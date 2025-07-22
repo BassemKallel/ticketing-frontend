@@ -1,13 +1,13 @@
-import './App.css'
-import { Button } from "@material-tailwind/react";
+import React from 'react';
+import AppRoutes from './routes/index'
+
 
 function App() {
-  
-
-  return (
-    <>
-    </>
-  )
+    return (
+        <div>
+            <AppRoutes />
+        </div>
+    );
 }
 
-export default App
+export default App;
