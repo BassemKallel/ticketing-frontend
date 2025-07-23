@@ -25,7 +25,7 @@ const Sidebar = () => {
                                 to={link.href}
                                 className={({ isActive }) =>
                                     `flex items-center px-4 py-3 my-2 rounded-lg transition-colors duration-200 ${
-                                    isActive ? 'bg-orange-300 text-white' : 'text-gray-400 hover:bg-gray-400 hover:text-white'
+                                    isActive ? 'bg-[#F28C38]  transition-colors duration-200 text-white' : 'text-gray-400 hover:bg-gray-400 hover:text-white'
                                     }`
                                 }
                             >
