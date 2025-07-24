@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 
 const ticketService = {
     // GET /tickets
-    getAll: () => apiClient.get('/tickets').then(res => res.data),
+    getAll: (params) => apiClient.get('/tickets', { params }).then(res => res.data),
     
     // GET /tickets/{id}
     getById: (id) => apiClient.get(`/tickets/${id}`).then(res => res.data),
