@@ -9,7 +9,7 @@ const AllTicketsPage = () => {
     const [agents, setAgents] = useState([]); // Nouvel état pour les agents
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     const initialFilters = {
         search: '',
         status: '',
@@ -43,28 +43,28 @@ const AllTicketsPage = () => {
         setFilters(initialFilters);
     };
 
-    // Logique de filtrage côté client
-    const filteredTickets = tickets.filter(ticket => {
-        return (
-            (filters.search === '' || ticket.title.toLowerCase().includes(filters.search.toLowerCase())) &&
-            (filters.status === '' || ticket.statut === filters.status) &&
-            (filters.priority === '' || ticket.categorie === filters.priority) &&
-            (filters.agent === '' || ticket.agent_id === parseInt(filters.agent))
-        );
-    });
+    const filteredTickets = tickets.filter(ticket =>
+        (filters.search === '' ||
+            ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+            `TKT-${ticket.id}`.toLowerCase().includes(filters.search.toLowerCase())
+        ) &&
+        (filters.status === '' || ticket.statut === filters.status) &&
+        (filters.priority === '' || ticket.categorie === filters.priority) &&
+        (filters.agent === '' || ticket.agent_id === parseInt(filters.agent))
+    );
 
     return (
         <div>
-            <TicketFilters 
-                filters={filters} 
-                setFilters={setFilters} 
+            <TicketFilters
+                filters={filters}
+                setFilters={setFilters}
                 agents={agents} // On passe la liste des agents au composant de filtres
                 onReset={handleResetFilters} // On passe la fonction de reset
             />
-            <TicketList 
-                tickets={filteredTickets} 
-                isLoading={isLoading} 
-                error={error} 
+            <TicketList
+                tickets={filteredTickets}
+                isLoading={isLoading}
+                error={error}
             />
         </div>
     );
