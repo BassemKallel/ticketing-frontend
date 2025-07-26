@@ -5,6 +5,7 @@ import Login from '../pages/Auth/Login';
 import Signup from '../pages/Auth/Register';
 import TicketDetailPage from '../pages/TicketDetailPage';
 import AllTicketsPage from '../pages/AllTicketsPage';
+import MyTicketsPage from '../pages/MyticketsPages';
 import { useAuth } from '../hooks/useAuth'; 
 
 
@@ -53,6 +54,7 @@ const AppRoutes = () => {
 
             <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
             <Route path="/tickets" element={<ProtectedRoute><MainLayout><AllTicketsPage /></MainLayout></ProtectedRoute>} />
+            <Route path="/mytickets" element={<ProtectedRoute><MainLayout><MyTicketsPage /></MainLayout></ProtectedRoute>} />
 
             <Route path="/tickets/:id" element={<ProtectedRoute><MainLayout><TicketDetailPage /></MainLayout></ProtectedRoute>} />
 

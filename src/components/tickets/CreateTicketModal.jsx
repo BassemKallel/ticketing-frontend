@@ -29,15 +29,13 @@ const CreateTicketModal = ({ isOpen, onClose }) => {
         formData.append('description', description);
         formData.append('categorie', categorie);
         if (file) {
-            formData.append('fichier', file); // 'fichier' comme attendu par le backend
+            formData.append('fichier', file);
         }
 
         try {
             await ticketService.create(formData);
-            // Succès !
             alert('Ticket created successfully!'); // Remplacer par un toast plus tard
             onClose(); // Ferme la modale
-            // Idéalement, rafraîchir la liste des tickets ici
         } catch (err) {
             setError(err.message);
         } finally {
