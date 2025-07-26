@@ -19,6 +19,9 @@ const ticketService = {
 
     // DELETE /tickets/{id}
     delete: (id) => apiClient.delete(`/tickets/${id}`).then(res => res.data),
+
+    // GET /tickets/mytickets
+    getMyTickets: () => apiClient.get('/tickets/mytickets').then(res => res.data),
 };
 
 export default ticketService;

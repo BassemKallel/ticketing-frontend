@@ -1,12 +1,48 @@
 import StatusBadge from '../ui/StatusBadge';
 import { useNavigate } from 'react-router-dom';
+import { TrashIcon } from '@heroicons/react/24/outline';
+import ticketService from '../../services/ticketService';
+import ConfirmationModal from './ConfirmationModal';
+import { useAuth } from '../../hooks/useAuth';
+import { useState } from 'react';
 
 
-const TicketList = ({ tickets, isLoading, error }) => {
+const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [ticketToDelete, setTicketToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleTicketClick = (ticketId) => {
         navigate(`/tickets/${ticketId}`);
+    };
+
+    // Ouvre la modale de confirmation
+    const handleDeleteClick = (e, ticketId) => {
+        e.stopPropagation(); 
+        setTicketToDelete(ticketId);
+        setDeleteModalOpen(true);
+    };
+
+    // Gère la suppression effective après confirmation
+    const confirmDelete = async () => {
+        if (!ticketToDelete) return;
+        setIsDeleting(true);
+        try {
+            await ticketService.delete(ticketToDelete);
+            if (onTicketDeleted) {
+                onTicketDeleted(ticketToDelete);
+            }
+        } catch (err) {
+            console.error("Erreur lors de la suppression du ticket:", err);
+            // Idéalement, afficher un toast d'erreur ici
+        } finally {
+            setIsDeleting(false);
+            setDeleteModalOpen(false);
+            setTicketToDelete(null);
+        }
     };
 
     if (isLoading) {
@@ -18,38 +54,61 @@ const TicketList = ({ tickets, isLoading, error }) => {
     }
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50 text-gray-500 uppercase text-xs">
-                            <th className="px-4 py-3">Ticket ID</th>
-                            <th className="px-4 py-3">Subject</th>
-                            <th className="px-4 py-3">Created By</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Categorie</th>
-                            <th className="px-4 py-3">Assigned To</th>
-                            <th className="px-4 py-3">Created</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-700">
-                        {tickets.length > 0 ? tickets.map(ticket => (
-                            <tr key={ticket.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
-                                <td className="px-4 py-4 font-semibold text-gray-800">TKT-{ticket.id}</td>
-                                <td className="px-4 py-4">{ticket.title}</td>
-                                <td className="px-4 py-4">{ticket.createur.name}</td>
-                                <td className="px-4 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
-                                <td className="px-4 py-4"><StatusBadge value={ticket.categorie} /></td>
-                                <td className="px-4 py-4">{ticket.agent?.name || 'Unassigned'}</td>
-                                <td className="px-4 py-4 text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
+        <>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-gray-50 text-gray-500 uppercase text-xs">
+                                <th className="px-4 py-3">Ticket ID</th>
+                                <th className="px-4 py-3">Subject</th>
+                                <th className="px-4 py-3">Created By</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Categorie</th>
+                                <th className="px-4 py-3">Assigned To</th>
+                                <th className="px-4 py-3">Created</th>
+                                <th className="px-4 py-3 text-center">Actions</th>
                             </tr>
-                        )) : (
-                            <tr><td colSpan="5" className="text-center py-8 text-gray-500">Aucun ticket à afficher.</td></tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="text-gray-700">
+                            {tickets.length > 0 ? tickets.map(ticket => (
+                                <tr key={ticket.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
+                                    <td className="px-4 py-4 font-semibold text-gray-800">TKT-{ticket.id}</td>
+                                    <td className="px-4 py-4">{ticket.title}</td>
+                                    <td className="px-4 py-4">{ticket.createur.name}</td>
+                                    <td className="px-4 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
+                                    <td className="px-4 py-4"><StatusBadge value={ticket.categorie} /></td>
+                                    <td className="px-4 py-4">{ticket.agent?.name || 'Unassigned'}</td>
+                                    <td className="px-4 py-4 text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                                    <td className="px-4 py-4 text-center">
+                                        {(user?.id === ticket.user_id || user?.role === 'admin') && (
+                                            <button 
+                                                onClick={(e) => handleDeleteClick(e, ticket.id)}
+                                                className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"
+                                                title="Supprimer le ticket"
+                                            >
+                                                <TrashIcon className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr><td colSpan="8" className="text-center py-8 text-gray-500">Aucun ticket à afficher.</td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+            
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Ticket"
+                message="Are you sure you want to delete this ticket? This action cannot be undone."
+                isConfirming={isDeleting}
+            />
+        </>
     );
 };
 

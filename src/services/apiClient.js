@@ -5,10 +5,6 @@ const API_URL = 'http://127.0.0.1:8000/api';
 
 const apiClient = axios.create({
     baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    },
 });
 
 // Intercepteur pour ajouter automatiquement le token à chaque requête

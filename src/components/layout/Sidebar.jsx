@@ -10,7 +10,7 @@ const Sidebar = () => {
     const allLinks = [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['admin', 'agent', 'client'] },
         { name: 'All Tickets', href: '/tickets', icon: TicketIcon, roles: ['admin', 'agent'] },
-        { name: 'My Tickets', href: '/my-tickets', icon: TicketIcon, roles: ['client', 'agent', 'admin'] },
+        { name: 'My Tickets', href: '/mytickets', icon: TicketIcon, roles: ['client', 'agent'] },
         { name: 'Users', href: '/users', icon: UsersIcon, roles: ['admin'] },
     ];
 
