@@ -82,7 +82,7 @@ const CreateTicketModal = ({ isOpen, onClose }) => {
                 {error && <p className="text-sm text-red-500 text-center">{error}</p>}
                 <div className="flex justify-end space-x-4 pt-4">
                     <button type="button" onClick={onClose} className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="rounded-md border border-transparent bg-blue-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-600 disabled:bg-blue-300">
+                    <button type="submit" disabled={isSubmitting} className="rounded-md border border-transparent bg-orange-400 py-2 px-4 text-sm font-medium text-white shadow-sm transition-colors duration-100  hover:bg-orange-300 disabled:bg-orange-200">
                         {isSubmitting ? 'Creating...' : 'Create Ticket'}
                     </button>
                 </div>

@@ -1,11 +1,10 @@
-import StatusBadge from '../ui/StatusBadge';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import StatusBadge from '../ui/StatusBadge';
 import ticketService from '../../services/ticketService';
 import ConfirmationModal from './ConfirmationModal';
 import { useAuth } from '../../hooks/useAuth';
-import { useState } from 'react';
-
 
 const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
     const navigate = useNavigate();
@@ -19,14 +18,12 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
         navigate(`/tickets/${ticketId}`);
     };
 
-    // Ouvre la modale de confirmation
     const handleDeleteClick = (e, ticketId) => {
         e.stopPropagation(); 
         setTicketToDelete(ticketId);
         setDeleteModalOpen(true);
     };
 
-    // Gère la suppression effective après confirmation
     const confirmDelete = async () => {
         if (!ticketToDelete) return;
         setIsDeleting(true);
@@ -71,28 +68,32 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                             </tr>
                         </thead>
                         <tbody className="text-gray-700">
-                            {tickets.length > 0 ? tickets.map(ticket => (
-                                <tr key={ticket.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
-                                    <td className="px-4 py-4 font-semibold text-gray-800">TKT-{ticket.id}</td>
-                                    <td className="px-4 py-4">{ticket.title}</td>
-                                    <td className="px-4 py-4">{ticket.createur.name}</td>
-                                    <td className="px-4 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
-                                    <td className="px-4 py-4"><StatusBadge value={ticket.categorie} /></td>
-                                    <td className="px-4 py-4">{ticket.agent?.name || 'Unassigned'}</td>
-                                    <td className="px-4 py-4 text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
-                                    <td className="px-4 py-4 text-center">
-                                        {(user?.id === ticket.user_id || user?.role === 'admin') && (
+                            {tickets.length > 0 ? tickets.map(ticket => {
+                                const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
+
+                                return (
+                                    <tr key={ticket.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
+                                        <td className="px-4 py-4 font-semibold text-gray-800">TKT-{ticket.id}</td>
+                                        <td className="px-4 py-4">{ticket.title}</td>
+                                        <td className="px-4 py-4">{ticket.createur?.name || 'Inconnu'}</td>
+                                        <td className="px-4 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
+                                        <td className="px-4 py-4"><StatusBadge value={ticket.categorie} /></td>
+                                        <td className="px-4 py-4">{ticket.agent?.name || 'Unassigned'}</td>
+                                        <td className="px-4 py-4 text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                                        <td className="px-4 py-4 text-center">
+                                            {/* Le bouton est toujours visible, mais désactivé si l'utilisateur n'a pas la permission */}
                                             <button 
                                                 onClick={(e) => handleDeleteClick(e, ticket.id)}
-                                                className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"
-                                                title="Supprimer le ticket"
+                                                className="p-2 text-gray-400 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:text-red-500 hover:bg-red-100"
+                                                title={canDelete ? "Supprimer le ticket" : "Vous n'avez pas la permission de supprimer ce ticket"}
+                                                disabled={!canDelete}
                                             >
                                                 <TrashIcon className="h-5 w-5" />
                                             </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            )) : (
+                                        </td>
+                                    </tr>
+                                );
+                            }) : (
                                 <tr><td colSpan="8" className="text-center py-8 text-gray-500">Aucun ticket à afficher.</td></tr>
                             )}
                         </tbody>
@@ -104,8 +105,8 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
-                title="Delete Ticket"
-                message="Are you sure you want to delete this ticket? This action cannot be undone."
+                title="Supprimer le Ticket"
+                message="Êtes-vous sûr de vouloir supprimer ce ticket? Cette action est irréversible."
                 isConfirming={isDeleting}
             />
         </>

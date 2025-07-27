@@ -5,7 +5,7 @@ import ticketService from '../../services/ticketService';
 
 
 
-const ChangeStatusModal = ({ isOpen, onClose, ticket, onTicketUpdate }) => {
+const ChangeStatusModal = ({ isOpen, onClose, ticket, onSuccess }) => {
     const [newStatus, setNewStatus] = useState(ticket?.statut || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -23,7 +23,7 @@ const ChangeStatusModal = ({ isOpen, onClose, ticket, onTicketUpdate }) => {
         setIsSubmitting(true);
         try {
             const updatedTicket = await ticketService.updateStatus(ticket.id, { statut: newStatus });
-            onTicketUpdate(updatedTicket);
+            onSuccess(updatedTicket);
             onClose();
         } catch (err) {
             setError(err.message);
@@ -47,7 +47,7 @@ const ChangeStatusModal = ({ isOpen, onClose, ticket, onTicketUpdate }) => {
                 {error && <p className="text-sm text-red-500">{error}</p>}
                 <div className="flex justify-end space-x-4 pt-4">
                     <button type="button" onClick={onClose} className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 disabled:bg-orange-300">{isSubmitting ? 'Updating...' : 'Update Status'}</button>
+                    <button type="submit" disabled={isSubmitting} className="rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-400 disabled:bg-orange-300">{isSubmitting ? 'Updating...' : 'Update Status'}</button>
                 </div>
             </form>
         </Modal>

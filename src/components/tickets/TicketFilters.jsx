@@ -12,38 +12,70 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
 
     return (
         <div className="bg-white p-4 rounded-lg shadow-md mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+                
+                {/* Champ de recherche */}
                 <div className="relative md:col-span-2">
                     <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <input type="text" name="search" value={filters.search || ''} onChange={handleInputChange} placeholder="Search Tickets..." className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value={filters.search || ''} 
+                        onChange={handleInputChange} 
+                        placeholder="Rechercher par ID, sujet..." 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500" 
+                    />
                 </div>
-                <select name="status" value={filters.status || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Status</option>
-                    <option value="Ouvert">Open</option>
-                    <option value="En_cours">In Progress</option>
-                    <option value="Resolu">Resolved</option>
-                    <option value="Fermé">Closed</option>
-                </select>
-                <select name="priority" value={filters.priority || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Priorities</option>
-                    <option value="Bloquage">High</option>
-                    <option value="Demande">Medium</option>
-                    <option value="Question">Low</option>
+                
+                {/* Filtre par statut */}
+                <select 
+                    name="status" 
+                    value={filters.status || ''} 
+                    onChange={handleInputChange} 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                >
+                    <option value="">Tous les statuts</option>
+                    <option value="Ouvert">Ouvert</option>
+                    <option value="En_cours">En cours</option>
+                    <option value="Resolu">Résolu</option>
+                    <option value="Fermé">Fermé</option>
                 </select>
                 
-                {/* On n'affiche ce filtre que si l'utilisateur est admin ou agent */}
+                {/* Filtre par priorité */}
+                <select 
+                    name="priority" 
+                    value={filters.priority || ''} 
+                    onChange={handleInputChange} 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                >
+                    <option value="">Toutes les categories</option>
+                    <option value="Bloquage">Blouqant</option>
+                    <option value="Demande">Demande</option>
+                    <option value="Question">Question</option>
+                </select>
+                
+                {/* Filtre par agent (visible pour admin/agent) */}
                 {user && (user.role === 'admin' || user.role === 'agent') && (
-                    <select name="agent" value={filters.agent || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Agents</option>
+                    <select 
+                        name="agent" 
+                        value={filters.agent || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                    >
+                        <option value="">Tous les agents</option>
                         {agents.map(agent => (
                             <option key={agent.id} value={agent.id}>{agent.name}</option>
                         ))}
                     </select>
                 )}
 
-                <button onClick={onReset} className="flex items-center justify-center space-x-2 w-full border rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100">
+                {/* Bouton Reset */}
+                <button 
+                    onClick={onReset} 
+                    className="flex items-center justify-center space-x-2 w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                >
                     <ArrowPathIcon className="h-5 w-5" />
-                    <span>Reset</span>
+                    <span>Réinitialiser</span>
                 </button>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import TicketFilters from '../components/tickets/TicketFilters';
 import TicketList from '../components/tickets/TicketList';
 import ticketService from '../services/ticketService';
@@ -43,15 +43,37 @@ const AllTicketsPage = () => {
         setFilters(initialFilters);
     };
 
-    // Logique de filtrage côté client
-    const filteredTickets = tickets.filter(ticket => {
-        return (
-            (filters.search === '' || ticket.title.toLowerCase().includes(filters.search.toLowerCase())) &&
-            (filters.status === '' || ticket.statut === filters.status) &&
-            (filters.priority === '' || ticket.categorie === filters.priority) &&
-            (filters.agent === '' || ticket.agent_id === parseInt(filters.agent))
-        );
-    });
+    // Logique de filtrage améliorée et optimisée avec useMemo
+    const filteredTickets = useMemo(() => {
+        // Normalise le terme de recherche une seule fois pour la performance
+        const searchTerm = filters.search.toLowerCase().trim();
+
+        // Si pas de filtres, on retourne tous les tickets directement
+        if (!searchTerm && !filters.status && !filters.priority && !filters.agent) {
+            return tickets;
+        }
+
+        return tickets.filter(ticket => {
+            // Condition de recherche (ID, Sujet/Titre, Créateur)
+            // On vérifie que chaque propriété existe avant de faire le .includes()
+            const searchMatch = searchTerm === '' ||
+                (ticket.id && ticket.id.toString().toLowerCase().includes(searchTerm)) ||
+                (ticket.title && ticket.title.toLowerCase().includes(searchTerm)) ||
+                (ticket.createur && ticket.createur.name && ticket.createur.name.toLowerCase().includes(searchTerm));
+
+            // Filtre par statut
+            const statusMatch = filters.status === '' || ticket.statut === filters.status;
+            
+            // Filtre par priorité
+            const priorityMatch = filters.priority === '' || ticket.categorie === filters.priority;
+            
+            // Filtre par agent (comparaison de chaînes de caractères pour plus de sécurité)
+            const agentMatch = filters.agent === '' || (ticket.agent_id && ticket.agent_id.toString() === filters.agent);
+
+            // Le ticket est inclus s'il correspond à TOUS les filtres actifs
+            return searchMatch && statusMatch && priorityMatch && agentMatch;
+        });
+    }, [tickets, filters]); // Le calcul est refait seulement si la liste de tickets ou les filtres changent
 
     return (
         <div>
