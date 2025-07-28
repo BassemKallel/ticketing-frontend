@@ -2,7 +2,7 @@ import apiClient from './apiClient';
 
 const userService = {
     // Récupère tous les utilisateurs (pour la page d'administration)
-    getAllUsers: () => apiClient.get('/admin/users').then(res => res.data),
+    getAllUsers: () => apiClient.get('/users').then(res => res.data),
 
     // Récupère uniquement les agents (pour les listes déroulantes, etc.)
     // Note : Ceci nécessite la création de la route GET /api/agents dans Laravel

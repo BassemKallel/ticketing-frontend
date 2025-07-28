@@ -9,9 +9,10 @@ const Sidebar = () => {
 
     const allLinks = [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['admin', 'agent', 'client'] },
-        { name: 'All Tickets', href: '/tickets', icon: TicketIcon, roles: ['admin', 'agent'] },
+        { name: 'All Tickets', href: '/tickets', icon: TableCellsIcon, roles: ['admin', 'agent'] },
         { name: 'My Tickets', href: '/mytickets', icon: TicketIcon, roles: ['client', 'agent'] },
-        { name: 'Users', href: '/users', icon: UsersIcon, roles: ['admin'] },
+        { name: 'Users', href: '/users', icon: UsersIcon, roles: ['admin','agent'] },
+        { name: 'Notifications', href: '/notifications', icon: BellIcon, roles: ['admin', 'agent', 'client'] },
     ];
 
     const visibleLinks = allLinks.filter(link => link.roles.includes(user?.role));

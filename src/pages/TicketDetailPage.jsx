@@ -211,15 +211,15 @@ const TicketDetailPage = () => {
                             <div className="flex justify-between items-center mt-1">
                                 <StatusBadge type="status" value={ticket.statut} />
                                 {
-                                    (user?.id === ticket.agent_id || user?.role === 'admin') 
+                                    (user?.id === ticket.agent_id || user?.role === 'admin')
                                     && (<button onClick={() => setStatusModalOpen(true)} className="text-sm text-blue-500 font-semibold hover:underline">Changer</button>)
                                 }
-                                
+
                             </div>
                         </div>
                         <div className="mt-4 border-t pt-4 space-y-3 text-sm">
                             <div className="flex items-center"><TicketIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">ID:</span><span className="font-semibold text-gray-800 ml-2">TKT-{ticket.id}</span></div>
-                            <div className="flex items-center"><StarIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">Priorité:</span><span className="font-semibold text-red-500 ml-2">{ticket.categorie}</span></div>
+                            <div className="flex items-center"><StarIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">Categorie:</span><span className="font-semibold text-red-500 ml-2">{ticket.categorie}</span></div>
                             <div className="flex items-center"><ClockIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">Mise à jour:</span><span className="font-semibold text-gray-800 ml-2">{new Date(ticket.updated_at).toLocaleDateString()}</span></div>
                         </div>
                         <div className="mt-4 border-t pt-4">
@@ -229,7 +229,7 @@ const TicketDetailPage = () => {
                                 {
                                     user?.role === 'admin' && (<button onClick={() => setAssignModalOpen(true)} className="text-sm text-blue-500 font-semibold hover:underline">Assigner</button>)
                                 }
-                                
+
                             </div>
                         </div>
                         <div className="mt-4 border-t pt-4">
@@ -245,7 +245,6 @@ const TicketDetailPage = () => {
                     </div>
                     <div className="space-y-3">
                         <button className="w-full bg-white text-gray-800 font-semibold py-3 rounded-lg shadow-md hover:bg-gray-50">Fermer le Ticket</button>
-                        <button className="w-full bg-white text-gray-800 font-semibold py-3 rounded-lg shadow-md hover:bg-gray-50">Imprimer le Ticket</button>
                     </div>
                 </div>
             </div>

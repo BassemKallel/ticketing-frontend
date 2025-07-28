@@ -52,36 +52,41 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
 
     return (
         <>
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-gray-50 text-gray-500 uppercase text-xs">
-                                <th className="px-4 py-3">Ticket ID</th>
-                                <th className="px-4 py-3">Subject</th>
-                                <th className="px-4 py-3">Created By</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3">Categorie</th>
-                                <th className="px-4 py-3">Assigned To</th>
-                                <th className="px-4 py-3">Created</th>
-                                <th className="px-4 py-3 text-center">Actions</th>
+                        <thead className="bg-gray-50">
+                            <tr className="text-gray-600 uppercase text-xs">
+                                <th className="px-6 py-3 font-semibold">Sujet</th>
+                                <th className="px-6 py-3 font-semibold">Statut</th>
+                                <th className="px-6 py-3 font-semibold">Catégorie</th>
+                                <th className="px-6 py-3 font-semibold">Assigné à</th>
+                                <th className="px-6 py-3 font-semibold">Créé le</th>
+                                <th className="px-6 py-3 font-semibold text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="text-gray-700">
+                        <tbody className="text-gray-700 divide-y divide-gray-200">
                             {tickets.length > 0 ? tickets.map(ticket => {
                                 const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
 
                                 return (
-                                    <tr key={ticket.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
-                                        <td className="px-4 py-4 font-semibold text-gray-800">TKT-{ticket.id}</td>
-                                        <td className="px-4 py-4">{ticket.title}</td>
-                                        <td className="px-4 py-4">{ticket.createur?.name || 'Inconnu'}</td>
-                                        <td className="px-4 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
-                                        <td className="px-4 py-4"><StatusBadge value={ticket.categorie} /></td>
-                                        <td className="px-4 py-4">{ticket.agent?.name || 'Unassigned'}</td>
-                                        <td className="px-4 py-4 text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
-                                        <td className="px-4 py-4 text-center">
-                                            {/* Le bouton est toujours visible, mais désactivé si l'utilisateur n'a pas la permission */}
+                                    <tr key={ticket.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded-full bg-orange-100 flex-shrink-0 flex items-center justify-center font-bold text-orange-500 text-base">
+                                                    {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-sm">{ticket.title}</p>
+                                                    <p className="text-xs text-gray-500">TKT-{ticket.id} • Par {ticket.createur?.name || 'Inconnu'}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
+                                        <td className="px-6 py-4"><StatusBadge value={ticket.categorie} /></td>
+                                        <td className="px-6 py-4 text-sm">{ticket.agent?.name || 'Non assigné'}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4 text-center">
                                             <button 
                                                 onClick={(e) => handleDeleteClick(e, ticket.id)}
                                                 className="p-2 text-gray-400 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:text-red-500 hover:bg-red-100"
@@ -94,7 +99,10 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                                     </tr>
                                 );
                             }) : (
-                                <tr><td colSpan="8" className="text-center py-8 text-gray-500">Aucun ticket à afficher.</td></tr>
+                                <tr><td colSpan="6" className="text-center py-16 text-gray-500">
+                                    <h3 className="text-xl font-semibold">Aucun ticket à afficher</h3>
+                                    <p className="mt-1">Il n'y a pas de tickets correspondant à vos filtres.</p>
+                                </td></tr>
                             )}
                         </tbody>
                     </table>

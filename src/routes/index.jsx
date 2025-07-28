@@ -6,6 +6,8 @@ import Signup from '../pages/Auth/Register';
 import TicketDetailPage from '../pages/TicketDetailPage';
 import AllTicketsPage from '../pages/AllTicketsPage';
 import MyTicketsPage from '../pages/MyticketsPages';
+import NotificationsPage from '../pages/NotificationsPage';
+import UsersListPage from '../pages/UsersListPage';
 import { useAuth } from '../hooks/useAuth'; 
 
 
@@ -55,6 +57,8 @@ const AppRoutes = () => {
             <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
             <Route path="/tickets" element={<ProtectedRoute><MainLayout><AllTicketsPage /></MainLayout></ProtectedRoute>} />
             <Route path="/mytickets" element={<ProtectedRoute><MainLayout><MyTicketsPage /></MainLayout></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><MainLayout><NotificationsPage /></MainLayout></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute><MainLayout><UsersListPage /></MainLayout></ProtectedRoute>} />
 
             <Route path="/tickets/:id" element={<ProtectedRoute><MainLayout><TicketDetailPage /></MainLayout></ProtectedRoute>} />
 
