@@ -19,7 +19,7 @@ const UserFilters = ({ filters, setFilters, onReset }) => {
                         value={filters.search || ''}
                         onChange={handleInputChange}
                         placeholder="Rechercher par nom ou email..."
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
                     />
                 </div>
 
@@ -29,7 +29,7 @@ const UserFilters = ({ filters, setFilters, onReset }) => {
                         name="role"
                         value={filters.role || ''}
                         onChange={handleInputChange}
-                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2  focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
                     >
                         <option value="">Tous les Rôles</option>
                         <option value="admin">Admin</option>

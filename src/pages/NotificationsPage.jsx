@@ -59,7 +59,7 @@ const NotificationsPage = () => {
     const groupedNotifications = groupNotificationsByDate(notifications);
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto p-2 max-w-7xl">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Notifications</h1>
                 <button

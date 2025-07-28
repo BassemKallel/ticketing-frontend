@@ -3,21 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { BellIcon, TicketIcon, ChatBubbleLeftRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useNotifications } from '../../context/NotificationContext';
 
-// Helper function to determine the icon based on notification type
+// Helper pour déterminer l'icône et sa couleur
 const getNotificationIcon = (type) => {
     switch (type) {
         case 'new_ticket':
-            return <TicketIcon className="h-5 w-5 text-blue-500" />;
+            return <TicketIcon className="h-6 w-6 text-orange-500" />;
         case 'new_comment':
-            return <ChatBubbleLeftRightIcon className="h-5 w-5 text-green-500" />;
+            return <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-500" />;
         default:
-            return <CheckCircleIcon className="h-5 w-5 text-purple-500" />;
+            return <CheckCircleIcon className="h-6 w-6 text-gray-500" />;
     }
 };
 
 const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
-    // --- ÉTAPE 1: Récupérer la nouvelle fonction du contexte ---
     const { notifications, unreadCount, markAllAsRead, markOneAsRead } = useNotifications();
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
@@ -26,7 +25,6 @@ const NotificationBell = () => {
         setIsOpen(!isOpen);
     };
 
-    // --- ÉTAPE 2: Mettre à jour la logique de clic ---
     const handleNotificationClick = (notification) => {
         const actionUrl = notification.data?.action_url;
 
@@ -42,6 +40,7 @@ const NotificationBell = () => {
         }
     };
 
+    // Ferme le menu en cliquant à l'extérieur
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -56,7 +55,7 @@ const NotificationBell = () => {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button onClick={handleToggle} className="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+            <button onClick={handleToggle} className="relative p-2 rounded-full hover:bg-gray-100 focus:bg-gray-100 transition-colors duration-200">
                 <BellIcon className="h-6 w-6 text-gray-600" />
                 {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 h-5 w-5 bg-orange-500 text-white text-xs font-semibold rounded-full flex items-center justify-center border-2 border-white">
@@ -72,7 +71,7 @@ const NotificationBell = () => {
                         <button
                             onClick={markAllAsRead}
                             disabled={unreadCount === 0}
-                            className="text-sm text-blue-500 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
+                            className="text-sm text-orange-500 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
                         >
                             Tout marquer comme lu
                         </button>
@@ -84,14 +83,13 @@ const NotificationBell = () => {
                             const actionUrl = notif.data?.action_url;
                             const notifType = notif.data?.type;
                             return (
-                                // --- ÉTAPE 3: Mettre à jour l'appel onClick ---
                                 <button
                                     key={notif.id}
                                     onClick={() => handleNotificationClick(notif)}
-                                    className="w-full text-left block p-3 border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+                                    className={`w-full text-left block p-3 border-b last:border-b-0 transition-colors ${!notif.read_at ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-gray-50'}`}
                                 >
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0">
                                             {getNotificationIcon(notifType)}
                                         </div>
                                         <div className="flex-grow">
@@ -101,7 +99,7 @@ const NotificationBell = () => {
                                             </p>
                                         </div>
                                         {!notif.read_at && (
-                                            <div className="h-2.5 w-2.5 rounded-full bg-blue-500 flex-shrink-0 self-center"></div>
+                                            <div className="h-2.5 w-2.5 rounded-full bg-orange-500 flex-shrink-0 self-center"></div>
                                         )}
                                     </div>
                                 </button>
@@ -116,7 +114,7 @@ const NotificationBell = () => {
                 </div>
                 {notifications.length > 0 && (
                     <div className="border-t">
-                        <a href="/notifications" onClick={(e) => { e.preventDefault(); navigate('/notifications'); setIsOpen(false); }} className="block w-full text-center p-3 text-sm font-semibold text-blue-500 hover:bg-gray-50 rounded-b-lg">
+                        <a href="/notifications" onClick={(e) => { e.preventDefault(); navigate('/notifications'); setIsOpen(false); }} className="block w-full text-center p-3 text-sm font-semibold text-orange-500 hover:bg-gray-50 rounded-b-lg">
                             Voir toutes les notifications
                         </a>
                     </div>

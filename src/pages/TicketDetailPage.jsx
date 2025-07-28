@@ -10,6 +10,8 @@ import AssignTicketModal from '../components/tickets/AssignTicketModal';
 import ChangeStatusModal from '../components/tickets/ChangeStatusModal';
 import ConfirmationModal from '../components/tickets/ConfirmationModal';
 import { useAuth } from '../hooks/useAuth';
+import { toast } from 'react-toastify'; // Importation de react-toastify
+
 // Importation des composants pour la conversation
 import ChatMessage from '../components/tickets/ChatMessage';
 import AttachmentMessage from '../components/tickets/AttachmentMessage';
@@ -39,6 +41,7 @@ const TicketDetailPage = () => {
             setTicket(data);
         } catch (err) {
             setError(err.message);
+            toast.error("Erreur lors du chargement du ticket.");
         } finally {
             setIsLoading(false);
         }
@@ -68,6 +71,8 @@ const TicketDetailPage = () => {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         if (!newComment.trim() && !newFile) return;
+        
+        const submittingToast = toast.loading("Envoi de la réponse...");
 
         const promises = [];
         if (newComment.trim()) {
@@ -80,14 +85,18 @@ const TicketDetailPage = () => {
         }
 
         try {
-            await Promise.all(promises);
-        } catch (err) {
-            console.error("Failed to post update:", err);
-            setError("Impossible d'envoyer votre réponse. Veuillez réessayer.");
-        } finally {
+            const responses = await Promise.all(promises);
+            // On utilise le message de la première réponse réussie
+            const successMessage = responses[0]?.message || "Réponse envoyée avec succès !";
+            toast.update(submittingToast, { render: successMessage, type: "success", isLoading: false, autoClose: 5000 });
             setNewComment('');
             setNewFile(null);
             fetchTicket();
+        } catch (err) {
+            console.error('Erreur détaillée d\'envoi:', err.response || err);
+            // Affiche le message d'erreur du backend s'il existe, sinon un message par défaut
+            const errorMessage = err.response?.data?.message || err.message || "Impossible d'envoyer votre réponse.";
+            toast.update(submittingToast, { render: errorMessage, type: "error", isLoading: false, autoClose: 5000 });
         }
     };
 
@@ -98,17 +107,27 @@ const TicketDetailPage = () => {
     const handleConfirmDelete = async () => {
         if (!itemToDelete) return;
         const { type, id } = itemToDelete;
+
+        const deletingToast = toast.loading("Suppression en cours...");
+
         try {
+            let response;
             if (type === 'commentaire') {
-                await commentaireService.delete(id);
+                response = await commentaireService.delete(id);
                 setTicket(prev => ({ ...prev, commentaires: prev.commentaires.filter(c => c.id !== id) }));
             } else if (type === 'pièce jointe') {
-                await pieceJointeService.delete(id);
+                response = await pieceJointeService.delete(id);
                 setTicket(prev => ({ ...prev, pieces_jointes: prev.pieces_jointes.filter(pj => pj.id !== id) }));
             }
+            const successMessage = response?.message || "Élément supprimé avec succès !";
+            toast.update(deletingToast, { render: successMessage, type: "success", isLoading: false, autoClose: 5000 });
         } catch (err) {
-            console.error(`Failed to delete ${type}:`, err);
-            setError(`Erreur lors de la suppression. Veuillez réessayer.`);
+            // Affiche l'erreur détaillée dans la console pour le débogage
+            console.error('Erreur détaillée de suppression:', err.response || err);
+            
+            // Affiche le message d'erreur du backend s'il existe, sinon un message par défaut
+            const errorMessage = err.response?.data?.message || err.message || "Erreur lors de la suppression.";
+            toast.update(deletingToast, { render: errorMessage, type: "error", isLoading: false, autoClose: 5000 });
         } finally {
             setItemToDelete(null);
         }
@@ -128,7 +147,7 @@ const TicketDetailPage = () => {
     }, [ticket]);
 
     if (isLoading) return <div className="text-center p-8">Chargement du ticket...</div>;
-    if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
+    if (error && !ticket) return <div className="text-center p-8 text-red-500">{error}</div>;
     if (!ticket) return null;
 
     return (
@@ -214,7 +233,6 @@ const TicketDetailPage = () => {
                                     (user?.id === ticket.agent_id || user?.role === 'admin')
                                     && (<button onClick={() => setStatusModalOpen(true)} className="text-sm text-blue-500 font-semibold hover:underline">Changer</button>)
                                 }
-
                             </div>
                         </div>
                         <div className="mt-4 border-t pt-4 space-y-3 text-sm">
@@ -229,7 +247,6 @@ const TicketDetailPage = () => {
                                 {
                                     user?.role === 'admin' && (<button onClick={() => setAssignModalOpen(true)} className="text-sm text-blue-500 font-semibold hover:underline">Assigner</button>)
                                 }
-
                             </div>
                         </div>
                         <div className="mt-4 border-t pt-4">

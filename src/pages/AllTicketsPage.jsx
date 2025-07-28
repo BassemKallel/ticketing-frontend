@@ -54,8 +54,8 @@ const AllTicketsPage = () => {
     );
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">My Tickets</h1>
+        <div className='container mx-auto p-2 max-w-7xl'>
+            <h1 className="text-3xl font-bold text-gray-800 mb-8">All Tickets</h1>
             <TicketFilters
                 filters={filters}
                 setFilters={setFilters}

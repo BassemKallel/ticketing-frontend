@@ -19,8 +19,9 @@ const Sidebar = () => {
 
     return (
         <aside className="bg-[#1e293b] text-white w-64 flex-shrink-0 flex flex-col">
-            <div className="h-20 flex items-center justify-center text-2xl font-bold">
-                TikTak Pro
+            <div className="h-20 flex items-center justify-center text-3xl font-bold gap-1">
+                <img src="src/assets/Logo-tiktak.png" alt="TikTak Pro Logo" className="h-12 w-12" />
+                <span>TikTak Pro</span>
             </div>
             <nav className="flex-grow px-4">
                 <ul>

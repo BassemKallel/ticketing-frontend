@@ -23,17 +23,17 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                         value={filters.search || ''} 
                         onChange={handleInputChange} 
                         placeholder="Rechercher par ID, sujet..." 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg  focus:ring-2 focus:ring-orange-400 focus:border-orange-500" 
                     />
                 </div>
-                <select name="status" value={filters.status || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="status" value={filters.status || ''} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400 focus:border-orange-500">
                     <option value="">All Status</option>
                     <option value="Ouvert">Open</option>
                     <option value="En_cours">In Progress</option>
                     <option value="Resolu">Resolved</option>
                     <option value="Fermé">Closed</option>
                 </select>
-                <select name="priority" value={filters.priority || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="priority" value={filters.priority || ''} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400 focus:border-orange-500">
                     <option value="">All Priorities</option>
                     <option value="Bloquage">High</option>
                     <option value="Demande">Medium</option>
@@ -42,7 +42,7 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                 
                 {/* On n'affiche ce filtre que si l'utilisateur est admin ou agent */}
                 {user && (user.role === 'admin' || user.role === 'agent') && (
-                    <select name="agent" value={filters.agent || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="agent" value={filters.agent || ''} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2  focus:ring-2 focus:ring-orange-400 focus:border-orange-500">
                         <option value="">All Agents</option>
                         {agents.map(agent => (
                             <option key={agent.id} value={agent.id}>{agent.name}</option>

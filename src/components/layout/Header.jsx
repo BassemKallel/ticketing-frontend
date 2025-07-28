@@ -19,8 +19,8 @@ const Header = ({ onOpenCreateTicket }) => {
         }
     };
     return (
-        <header className="bg-white h-20 flex items-center justify-between px-8 border-b">
-            <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
+        <header className="bg-white h-20 flex items-center justify-between px-8 border border-gray-200 shadow-sm">
+            <h1 className="text-3xl font-bold text-gray-800">Admin Panel</h1>
             <div className="flex items-center space-x-6">
                 <button onClick={onOpenCreateTicket} className="bg-[#F28C38] hover:bg-[#F4C430] transition-colors duration-200 text-white px-4 py-2 rounded-lg font-semibold">Create Ticket</button>
                 <NotificationBell />

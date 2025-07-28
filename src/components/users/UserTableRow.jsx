@@ -8,7 +8,7 @@ const UserTableRow = ({ user, currentUser, onViewUser, onEditUser, onDeleteUser 
     const isSelf = String(currentUser?.id) === String(user.id);
 
     const canEdit = isAdmin;
-    const canDelete = isAdmin && !isSelf; // Un admin ne peut pas se supprimer lui-même
+    const canDelete = isAdmin && !isSelf;
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
@@ -25,10 +25,9 @@ const UserTableRow = ({ user, currentUser, onViewUser, onEditUser, onDeleteUser 
 
     return (
         <tr className="hover:bg-gray-50">
-            {/* Colonne Utilisateur */}
             <td className="px-5 py-4">
                 <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-orange-100 flex-shrink-0 flex items-center justify-center font-bold text-orange-500 text-sm">
+                    <div className="h-10 w-10 rounded-full bg-orange-100 flex-shrink-0 flex items-center justify-center font-bold text-orange-500 text-sm">
                         {user.name?.charAt(0).toUpperCase() || '?'}
                     </div>
                     <div>
@@ -40,7 +39,7 @@ const UserTableRow = ({ user, currentUser, onViewUser, onEditUser, onDeleteUser 
 
             {/* Colonne Rôle */}
             <td className="px-5 py-4">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
+                <span className={`px-2 py-1 text-sm font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
                     {user.role}
                 </span>
             </td>
@@ -56,30 +55,30 @@ const UserTableRow = ({ user, currentUser, onViewUser, onEditUser, onDeleteUser 
                     {/* Bouton Voir */}
                     <button 
                         onClick={() => onViewUser(user.id)}
-                        className="p-1.5 text-gray-400 rounded-md hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                        className="p-1.5 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-700 transition-colors"
                         title="Voir les détails de l'utilisateur"
                     >
-                        <EyeIcon className="h-4 w-4" />
+                        <EyeIcon className="h-5 w-5" />
                     </button>
 
                     {/* Bouton Modifier */}
                     <button 
                         onClick={() => onEditUser(user.id)}
-                        className="p-1.5 text-gray-400 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:bg-gray-100 hover:text-gray-700"
+                        className="p-1.5 text-gray-400 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:bg-green-100 hover:text-green-700"
                         title={canEdit ? "Modifier cet utilisateur" : "Action non autorisée"}
                         disabled={!canEdit}
                     >
-                        <PencilIcon className="h-4 w-4" />
+                        <PencilIcon className="h-5 w-5" />
                     </button>
 
                     {/* Bouton Supprimer */}
                     <button 
                         onClick={() => onDeleteUser(user.id)}
-                        className="p-1.5 text-gray-400 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:bg-red-100 hover:text-red-500"
+                        className="p-1.5 text-gray-400 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:bg-red-100 hover:text-red-500"
                         title={canDelete ? "Supprimer cet utilisateur" : "Vous не pouvez pas vous supprimer"}
                         disabled={!canDelete}
                     >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-5 w-5" />
                     </button>
                 </div>
             </td>

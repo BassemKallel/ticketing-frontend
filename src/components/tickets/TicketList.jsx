@@ -56,7 +56,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50">
-                            <tr className="text-gray-600 uppercase text-xs">
+                            <tr className="text-gray-600 uppercase text-sm">
                                 <th className="px-6 py-3 font-semibold">Sujet</th>
                                 <th className="px-6 py-3 font-semibold">Statut</th>
                                 <th className="px-6 py-3 font-semibold">Catégorie</th>
@@ -71,7 +71,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
 
                                 return (
                                     <tr key={ticket.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleTicketClick(ticket.id)}>
-                                        <td className="px-6 py-4">
+                                        <td className="px-5 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 rounded-full bg-orange-100 flex-shrink-0 flex items-center justify-center font-bold text-orange-500 text-base">
                                                     {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
@@ -82,11 +82,11 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
-                                        <td className="px-6 py-4"><StatusBadge value={ticket.categorie} /></td>
-                                        <td className="px-6 py-4 text-sm">{ticket.agent?.name || 'Non assigné'}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="px-5 py-4"><StatusBadge type="status" value={ticket.statut} /></td>
+                                        <td className="px-5 py-4"><StatusBadge value={ticket.categorie} /></td>
+                                        <td className="px-5 py-4 text-sm">{ticket.agent?.name || 'Non assigné'}</td>
+                                        <td className="px-5 py-4 text-sm text-gray-600">{new Date(ticket.created_at).toLocaleDateString()}</td>
+                                        <td className="px-5 py-4 text-center">
                                             <button 
                                                 onClick={(e) => handleDeleteClick(e, ticket.id)}
                                                 className="p-2 text-gray-400 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent hover:text-red-500 hover:bg-red-100"

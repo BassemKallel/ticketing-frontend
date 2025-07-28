@@ -4,57 +4,71 @@ import userService from '../services/userService';
 
 // Importation des composants
 import UserTable from '../components/users/UserTable';
-import UserFilters from '../components/users/UserFilters'; // Nouveau composant de filtres
+import UserFilters from '../components/users/UserFilters';
 import ConfirmationModal from '../components/tickets/ConfirmationModal';
+import EditUserModal from '../components/users/EditUserModal'; // Importer la modale d'édition
 
 const UsersListPage = () => {
-    const [allUsers, setAllUsers] = useState([]); // Contient tous les utilisateurs, non filtrés
+    const [allUsers, setAllUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user: currentUser } = useAuth();
-    
+
+    // États pour la suppression
     const [userToDelete, setUserToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // États pour la modale d'édition
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState(null);
+
     const [filters, setFilters] = useState({ search: '', role: '' });
 
+    // Fonction pour récupérer les utilisateurs
+    const fetchUsers = async () => {
+        try {
+            // Pas besoin de setIsLoading(true) ici si on l'appelle depuis useEffect
+            const usersData = await userService.getAllUsers();
+            setAllUsers(usersData);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setIsLoading(true);
-                const usersData = await userService.getAllUsers();
-                setAllUsers(usersData);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchUsers();
     }, []);
 
+    // Logique de filtrage
     const filteredUsers = useMemo(() => {
         let users = [...allUsers];
         const searchTerm = filters.search.toLowerCase().trim();
-
         if (searchTerm) {
             users = users.filter(user =>
                 user.name.toLowerCase().includes(searchTerm) ||
                 user.email.toLowerCase().includes(searchTerm)
             );
         }
-
         if (filters.role) {
             users = users.filter(user => user.role === filters.role);
         }
-
         return users;
     }, [allUsers, filters]);
 
+    // Ouvre la modale de suppression
     const handleDeleteRequest = (userId) => {
         setUserToDelete(userId);
     };
 
+    // Ouvre la modale d'édition et passe les données de l'utilisateur
+    const handleEditRequest = (user) => {
+        setUserToEdit(user);
+        setIsEditModalOpen(true);
+    };
+
+    // Confirme la suppression
     const confirmDelete = async () => {
         if (!userToDelete) return;
         setIsDeleting(true);
@@ -63,38 +77,34 @@ const UsersListPage = () => {
             setAllUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete));
         } catch (err) {
             console.error("Erreur lors de la suppression de l'utilisateur:", err);
-            // Gérer l'erreur (ex: toast)
         } finally {
             setIsDeleting(false);
             setUserToDelete(null);
         }
     };
     
-    // Gérer la navigation (à implémenter)
     const handleViewUser = (userId) => console.log("Voir l'utilisateur:", userId);
-    const handleEditUser = (userId) => console.log("Modifier l'utilisateur:", userId);
-    
+
     if (isLoading) return <div className="text-center p-8">Chargement des utilisateurs...</div>;
-    if (error) return <div className="text-center p-8 text-red-500">Erreur: {error}</div>;
+    if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
 
     return (
-        <div className="container mx-auto p-2 max-w-7xl">
-            
-                <h1 className="text-3xl font-bold mb-8 text-gray-800">Gestion des Utilisateurs</h1>
+        <div className="container mx-auto p-4 max-w-7xl">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-800">Gestion des Utilisateurs</h1>
+            </div>
 
-            {/* Le nouveau composant de filtres */}
             <UserFilters 
                 filters={filters}
                 setFilters={setFilters}
                 onReset={() => setFilters({ search: '', role: '' })}
             />
 
-            {/* Le tableau affiche maintenant les utilisateurs filtrés */}
             <UserTable
                 users={filteredUsers}
                 currentUser={currentUser}
                 onViewUser={handleViewUser}
-                onEditUser={handleEditUser}
+                onEditUser={handleEditRequest}
                 onDeleteUser={handleDeleteRequest}
             />
 
@@ -105,6 +115,13 @@ const UsersListPage = () => {
                 title="Supprimer l'Utilisateur"
                 message="Êtes-vous sûr de vouloir supprimer cet utilisateur? Cette action est irréversible."
                 isConfirming={isDeleting}
+            />
+            
+            <EditUserModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                userToEdit={userToEdit}
+                onSuccess={fetchUsers} // Rafraîchit la liste après une mise à jour réussie
             />
         </div>
     );
