@@ -59,7 +59,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center py-10">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-400"></div>
             </div>
         );
     }
@@ -83,7 +83,6 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
 
     return (
         <>
-            {/* Tableau pour desktop */}
             <div className="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">

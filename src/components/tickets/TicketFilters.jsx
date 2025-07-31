@@ -23,7 +23,7 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                         value={filters.search || ''} 
                         onChange={handleInputChange} 
                         placeholder="Rechercher par ID, sujet..." 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400" 
                     />
                 </div>
                 
@@ -32,7 +32,7 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                     name="status" 
                     value={filters.status || ''} 
                     onChange={handleInputChange} 
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400"
                 >
                     <option value="">Tous les statuts</option>
                     <option value="Ouvert">Ouvert</option>
@@ -46,7 +46,7 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                     name="priority" 
                     value={filters.priority || ''} 
                     onChange={handleInputChange} 
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400 "
                 >
                     <option value="">Toutes les categories</option>
                     <option value="Bloquage">Blouqant</option>
@@ -60,7 +60,7 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                         name="agent" 
                         value={filters.agent || ''} 
                         onChange={handleInputChange} 
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2  focus:ring-orange-400"
                     >
                         <option value="">Tous les agents</option>
                         {agents.map(agent => (
@@ -69,7 +69,6 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                     </select>
                 )}
 
-                {/* Bouton Reset */}
                 <button 
                     onClick={onReset} 
                     className="flex items-center justify-center space-x-2 w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
