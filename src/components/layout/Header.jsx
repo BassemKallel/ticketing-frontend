@@ -19,7 +19,7 @@ const Header = ({ onOpenCreateTicket }) => {
     };
     return (
         <header className="bg-white h-20 flex items-center justify-between px-8 border-b">
-            <h1 className="text-2xl font-bold text-gray-800">{getPageTitle()}</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Ticket Support</h1>
             <div className="flex items-center space-x-6">
                 <button onClick={onOpenCreateTicket} className="bg-[#F28C38] hover:bg-[#F4C430] transition-colors duration-200 text-white px-4 py-2 rounded-lg font-semibold">Create Ticket</button>
                 <div className="relative"><BellIcon className="h-6 w-6 text-gray-500" /><span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">3</span></div>
