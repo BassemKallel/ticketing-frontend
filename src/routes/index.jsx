@@ -7,6 +7,7 @@ import TicketDetailPage from '../pages/TicketDetailPage';
 import AllTicketsPage from '../pages/AllTicketsPage';
 import MyTicketsPage from '../pages/MyticketsPages';
 import { useAuth } from '../hooks/useAuth'; 
+import UsersListPage from '../pages/UserListPage';
 
 
 
@@ -55,7 +56,7 @@ const AppRoutes = () => {
             <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
             <Route path="/tickets" element={<ProtectedRoute><MainLayout><AllTicketsPage /></MainLayout></ProtectedRoute>} />
             <Route path="/mytickets" element={<ProtectedRoute><MainLayout><MyTicketsPage /></MainLayout></ProtectedRoute>} />
-
+            <Route path="/users" element={<ProtectedRoute><AdminRoute><MainLayout><UsersListPage /></MainLayout></AdminRoute></ProtectedRoute>} />
             <Route path="/tickets/:id" element={<ProtectedRoute><MainLayout><TicketDetailPage /></MainLayout></ProtectedRoute>} />
 
             

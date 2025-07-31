@@ -1,4 +1,3 @@
-import React from 'react';
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth'; 
 
@@ -23,34 +22,48 @@ const TicketFilters = ({ filters = {}, setFilters, agents = [], onReset }) => {
                         value={filters.search || ''} 
                         onChange={handleInputChange} 
                         placeholder="Rechercher par ID, sujet..." 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-orange-400 focus:border-orange-500" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400" 
                     />
                 </div>
-                <select name="status" value={filters.status || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Status</option>
-                    <option value="Ouvert">Open</option>
-                    <option value="En_cours">In Progress</option>
-                    <option value="Resolu">Resolved</option>
-                    <option value="Fermé">Closed</option>
+                {/* Filtre par statut */}
+                <select 
+                    name="status" 
+                    value={filters.status || ''} 
+                    onChange={handleInputChange} 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400"
+                >
+                    <option value="">Tous les statuts</option>
+                    <option value="Ouvert">Ouvert</option>
+                    <option value="En_cours">En cours</option>
+                    <option value="Resolu">Résolu</option>
+                    <option value="Fermé">Fermé</option>
                 </select>
-                <select name="priority" value={filters.priority || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Priorities</option>
-                    <option value="Bloquage">High</option>
-                    <option value="Demande">Medium</option>
-                    <option value="Question">Low</option>
+                {/* Filtre par priorité */}
+                <select 
+                    name="priority" 
+                    value={filters.priority || ''} 
+                    onChange={handleInputChange} 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400 "
+                >
+                    <option value="">Toutes les categories</option>
+                    <option value="Bloquage">Blouqant</option>
+                    <option value="Demande">Demande</option>
+                    <option value="Question">Question</option>
                 </select>
-                
-                {/* On n'affiche ce filtre que si l'utilisateur est admin ou agent */}
+                {/* Filtre par agent (visible pour admin/agent) */}
                 {user && (user.role === 'admin' || user.role === 'agent') && (
-                    <select name="agent" value={filters.agent || ''} onChange={handleInputChange} className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Agents</option>
+                    <select 
+                        name="agent" 
+                        value={filters.agent || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2  focus:ring-orange-400"
+                    >
+                        <option value="">Tous les agents</option>
                         {agents.map(agent => (
                             <option key={agent.id} value={agent.id}>{agent.name}</option>
                         ))}
                     </select>
                 )}
-
-                {/* Bouton Reset */}
                 <button 
                     onClick={onReset} 
                     className="flex items-center justify-center space-x-2 w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
