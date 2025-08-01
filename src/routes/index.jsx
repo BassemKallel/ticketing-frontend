@@ -8,6 +8,7 @@ import AllTicketsPage from '../pages/AllTicketsPage';
 import MyTicketsPage from '../pages/MyticketsPages';
 import { useAuth } from '../hooks/useAuth'; 
 import UsersListPage from '../pages/UserListPage';
+import NotificationsPage from '../pages/NotificationsPage';
 
 
 
@@ -58,8 +59,7 @@ const AppRoutes = () => {
             <Route path="/mytickets" element={<ProtectedRoute><MainLayout><MyTicketsPage /></MainLayout></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><AdminRoute><MainLayout><UsersListPage /></MainLayout></AdminRoute></ProtectedRoute>} />
             <Route path="/tickets/:id" element={<ProtectedRoute><MainLayout><TicketDetailPage /></MainLayout></ProtectedRoute>} />
-
-            
+            <Route path="/notifications" element={<ProtectedRoute><MainLayout><NotificationsPage /></MainLayout></ProtectedRoute>} />
 
             <Route path="*" element={<div>404 - Page non trouvée</div>} />
         </Routes>

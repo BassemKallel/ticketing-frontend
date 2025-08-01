@@ -47,8 +47,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                 onTicketDeleted(ticketToDelete);
             }
         } catch (err) {
-            console.error('Erreur lors de la suppression du ticket:', err);
-            toast.error('Erreur lors de la suppression du ticket');
+            toast.error(err.message)
         } finally {
             setIsDeleting(false);
             setDeleteModalOpen(false);
