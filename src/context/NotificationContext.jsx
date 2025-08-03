@@ -2,178 +2,167 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { toast } from 'react-toastify';
 import notificationService from '../services/notificationService';
 import { useAuth } from '../hooks/useAuth';
-import echo from '../services/echo';
+import echo from '../services/echo'; // Assurez-vous que l'instance Echo est bien importée
 
-const NotificationContext = createContext();
+// 1. Création du contexte (sans l'exporter directement)
+const NotificationContext = createContext(null);
 
-export const useNotifications = () => {
-    const context = useContext(NotificationContext);
-    if (!context) {
-        throw new Error('useNotifications must be used within a NotificationProvider');
-    }
-    return context;
-};
-
+// 2. Le composant "Provider" qui contient la logique
 export const NotificationProvider = ({ children }) => {
-    // Solution: Vérification sécurisée du contexte auth
     const authContext = useAuth();
-    const user = authContext?.user || null;
+    const user = authContext?.user;
 
-    const [state, setState] = useState({
-        notifications: [],
-        unreadCount: 0,
-        isLoading: true,
-        unreadTicketIds: new Set(),
-    });
-
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [unreadTicketIds, setUnreadTicketIds] = useState(new Set());
     const processedNotifications = useRef(new Set());
-    const channelRef = useRef(null);
 
+    // Fonction pour charger les notifications
     const fetchNotifications = useCallback(async () => {
-        // Vérification explicite de l'utilisateur
-        if (!user || !user.id) {
-            setState(prev => ({ ...prev, isLoading: false }));
+        if (!user) {
+            console.log('[Debug] fetchNotifications: Pas d\'utilisateur, nettoyage de l\'état.');
+            setNotifications([]);
+            setUnreadCount(0);
+            setUnreadTicketIds(new Set());
+            setIsLoading(false);
             return;
         }
-
-        setState(prev => ({ ...prev, isLoading: true }));
-
+        
+        console.log('[Debug] fetchNotifications: Début du chargement...');
+        setIsLoading(true);
         try {
-            const response = await notificationService.getAll();
-            const unread = response.unread || [];
-            const read = response.read || [];
+            const responseData = await notificationService.getAll();
+            console.log('[Debug] fetchNotifications: Données reçues de l\'API:', responseData);
 
+            const unread = responseData.unread || [];
+            const read = responseData.read || [];
+            const allNotifications = [...unread, ...read].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            
             const initialUnreadTickets = new Set();
             unread.forEach(notification => {
-                if (notification.data?.type === 'new_comment' && notification.data?.action_url) {
-                    const ticketId = notification.data.action_url.split('/').pop();
-                    if (ticketId) initialUnreadTickets.add(parseInt(ticketId, 10));
+                if (notification.data.type === 'new_comment' && notification.data.action_url) {
+                    const ticketId = parseInt(notification.data.action_url.split('/').pop(), 10);
+                    if (!isNaN(ticketId)) initialUnreadTickets.add(ticketId);
                 }
             });
 
-            setState({
-                notifications: [...unread, ...read].sort((a, b) =>
-                    new Date(b.created_at) - new Date(a.created_at)
-                ),
-                unreadCount: unread.length,
-                unreadTicketIds: initialUnreadTickets,
-                isLoading: false,
-            });
+            console.log('[Debug] fetchNotifications: Mise à jour de l\'état avec les nouvelles données.');
+            setNotifications(allNotifications);
+            setUnreadCount(unread.length);
+            setUnreadTicketIds(initialUnreadTickets);
         } catch (error) {
-            console.error("Failed to load notifications:", error);
-            setState(prev => ({ ...prev, isLoading: false }));
+            console.error("[Debug] fetchNotifications: Erreur lors du chargement :", error);
+        } finally {
+            setIsLoading(false);
+            console.log('[Debug] fetchNotifications: Chargement terminé.');
         }
-    }, [user]); // Dépendance sur user
-
-    // Gestion des WebSockets
-    useEffect(() => {
-        if (!user?.id) return;
-
-        const channelName = `App.Models.User.${user.id}`;
-        const channel = echo.private(channelName);
-        channelRef.current = channel;
-
-        const handleNewNotification = ({ notification }) => {
-            if (!notification?.id || processedNotifications.current.has(notification.id)) return;
-
-            processedNotifications.current.add(notification.id);
-
-            setState(prev => {
-                const isNew = !prev.notifications.some(n => n.id === notification.id);
-                const newUnreadCount = isNew ? prev.unreadCount + 1 : prev.unreadCount;
-
-                const newUnreadTickets = new Set(prev.unreadTicketIds);
-                if (notification.data?.type === 'new_comment' && notification.data?.action_url) {
-                    const ticketId = notification.data.action_url.split('/').pop();
-                    if (ticketId) newUnreadTickets.add(parseInt(ticketId, 10));
-                }
-
-                return {
-                    notifications: isNew
-                        ? [notification, ...prev.notifications]
-                        : prev.notifications,
-                    unreadCount: newUnreadCount,
-                    unreadTicketIds: newUnreadTickets,
-                    isLoading: false,
-                };
-            });
-
-            toast.info(notification.data?.message || 'Nouvelle notification');
-        };
-
-        channel.listen('.notification.created', handleNewNotification);
-
-        return () => {
-            channel.stopListening('.notification.created');
-            echo.leave(channelName);
-            channelRef.current = null;
-        };
     }, [user]);
 
-    const markOneAsRead = useCallback(async (notificationId) => {
-        try {
-            setState(prev => {
-                const updatedNotifications = prev.notifications.map(n =>
-                    n.id === notificationId && !n.read_at
-                        ? { ...n, read_at: new Date().toISOString() }
-                        : n
-                );
-
-                return {
-                    ...prev,
-                    notifications: updatedNotifications,
-                    unreadCount: Math.max(0, prev.unreadCount - 1),
-                };
-            });
-
-            await notificationService.markAsRead(notificationId);
-        } catch (error) {
-            console.error("Failed to mark notification as read:", error);
-            fetchNotifications();
-        }
-    }, [fetchNotifications]);
-
-    const markAllAsRead = useCallback(async () => {
-        if (state.unreadCount === 0) return;
-
-        try {
-            setState(prev => ({
-                ...prev,
-                notifications: prev.notifications.map(n =>
-                    !n.read_at ? { ...n, read_at: new Date().toISOString() } : n
-                ),
-                unreadCount: 0,
-                unreadTicketIds: new Set(),
-            }));
-
-            await notificationService.markAllAsRead();
-        } catch (error) {
-            console.error("Failed to mark all as read:", error);
-            fetchNotifications();
-        }
-    }, [state.unreadCount, fetchNotifications]);
-
-    const markTicketAsRead = useCallback((ticketId) => {
-        setState(prev => {
-            const newSet = new Set(prev.unreadTicketIds);
-            newSet.delete(ticketId);
-            return { ...prev, unreadTicketIds: newSet };
-        });
-    }, []);
-
     useEffect(() => {
+        console.log('[Debug] Lancement de fetchNotifications via useEffect.');
         fetchNotifications();
     }, [fetchNotifications]);
 
+    // Effet pour écouter les notifications en temps réel via WebSocket
+    useEffect(() => {
+        if (user?.id) {
+            console.log(`[Debug] WebSocket: Tentative de connexion au canal App.Models.User.${user.id}`);
+            const channel = echo.private(`App.Models.User.${user.id}`);
+
+            const handleNewNotification = (event) => {
+                console.log('[Debug] WebSocket: Événement "notification.nouvelle" reçu:', event);
+                const nouvelleNotification = event.notificationData;
+                if (processedNotifications.current.has(nouvelleNotification.id)) {
+                    console.log(`[Debug] WebSocket: Notification ${nouvelleNotification.id} déjà traitée, ignorée.`);
+                    return;
+                }
+
+                toast.info(nouvelleNotification.data.message || 'Vous avez une nouvelle notification !');
+                
+                setNotifications(prev => [nouvelleNotification, ...prev]);
+                setUnreadCount(prev => prev + 1);
+                
+                if (nouvelleNotification.data.type === 'new_comment' && nouvelleNotification.data.action_url) {
+                    const ticketId = parseInt(nouvelleNotification.data.action_url.split('/').pop(), 10);
+                    if (!isNaN(ticketId)) {
+                        setUnreadTicketIds(prevSet => new Set(prevSet).add(ticketId));
+                    }
+                }
+                
+                processedNotifications.current.add(nouvelleNotification.id);
+            };
+            
+            channel.listen('.notification.nouvelle', handleNewNotification);
+
+            return () => {
+                console.log(`[Debug] WebSocket: Nettoyage et déconnexion du canal App.Models.User.${user.id}`);
+                channel.stopListening('.notification.nouvelle', handleNewNotification);
+                echo.leave(`App.Models.User.${user.id}`);
+            };
+        } else {
+            console.log('[Debug] WebSocket: Pas d\'utilisateur, aucune connexion établie.');
+        }
+    }, [user]);
+
+    const markTicketAsRead = useCallback((ticketId) => {
+        setUnreadTicketIds(prevSet => {
+            const newSet = new Set(prevSet);
+            newSet.delete(ticketId);
+            return newSet;
+        });
+    }, []);
+
+    const markOneAsRead = async (notificationId) => {
+        const notification = notifications.find(n => n.id === notificationId);
+        if (!notification || !notification.read_at) {
+            try {
+                setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n));
+                setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
+                await notificationService.markAsRead(notificationId);
+            } catch (error) {
+                console.error("Impossible de marquer la notification comme lue :", error);
+                fetchNotifications();
+            }
+        }
+    };
+
+    const markAllAsRead = async () => {
+        if (unreadCount === 0) return;
+        try {
+            setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
+            setUnreadCount(0);
+            setUnreadTicketIds(new Set());
+            await notificationService.markAllAsRead();
+        } catch (error) {
+            console.error("Erreur lors du marquage de toutes les notifications :", error);
+            fetchNotifications();
+        }
+    };
+
+    const value = {
+        notifications,
+        unreadCount,
+        isLoading,
+        unreadTicketIds,
+        fetchNotifications,
+        markOneAsRead,
+        markAllAsRead,
+        markTicketAsRead,
+    };
+
     return (
-        <NotificationContext.Provider value={{
-            ...state,
-            fetchNotifications,
-            markOneAsRead,
-            markAllAsRead,
-            markTicketAsRead,
-        }}>
+        <NotificationContext.Provider value={value}>
             {children}
         </NotificationContext.Provider>
     );
+};
+
+// 3. Hook personnalisé qui utilise le contexte et vérifie s'il est bien utilisé
+export const useNotifications = () => {
+    const context = useContext(NotificationContext);
+    if (context === null) {
+        throw new Error('useNotifications must be used within a NotificationProvider');
+    }
+    return context;
 };

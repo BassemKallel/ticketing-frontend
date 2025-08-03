@@ -2,7 +2,6 @@ import React from 'react';
 import AppRoutes from './routes/index'
 import { ToastContainer } from 'react-toastify';
 
-
 function App() {
     return (
         <div>
