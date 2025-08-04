@@ -122,6 +122,7 @@ const AllTicketsPage = () => {
 
     return (
         <div>
+            <h1 className="text-3xl font-bold mb-4">Tous les tickets</h1>
             <TicketFilters
                 filters={filters}
                 setFilters={setFilters}

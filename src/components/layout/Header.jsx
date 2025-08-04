@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { HomeIcon, TicketIcon, UsersIcon, ArrowLeftOnRectangleIcon, BellIcon, ChevronDownIcon, ChartBarIcon, TableCellsIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../context/NotificationContext';
 import NotificationBell from './NotificationBell';
 
 const Header = ({ onOpenCreateTicket }) => {

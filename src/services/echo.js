@@ -13,10 +13,6 @@ const options = {
     forceTLS: true,
     // L'endpoint d'authentification pour les canaux privés sur votre backend Laravel
     authEndpoint: `${import.meta.env.VITE_API_BASE_URL}/broadcasting/auth`,
-    
-    // C'est la partie la plus importante pour les canaux privés avec Sanctum.
-    // On configure Echo pour qu'il envoie le token d'authentification
-    // à chaque fois qu'il demande l'autorisation pour un canal privé.
     authorizer: (channel, options) => {
         return {
             authorize: (socketId, callback) => {
