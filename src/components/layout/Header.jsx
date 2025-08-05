@@ -20,15 +20,13 @@ const Header = ({ onOpenCreateTicket }) => {
         }
     };
     return (
-        <header className="bg-white h-20 flex items-center justify-between px-8 border-b">
+        <header className="bg-white h-20 flex items-center justify-between px-8 shadow-md">
             <h1 className="text-3xl font-bold text-gray-800">Ticket Support</h1>
             <div className="flex items-center space-x-6">
-                <button onClick={onOpenCreateTicket} className="bg-[#F28C38] hover:bg-[#F4C430] transition-colors duration-200 text-white px-4 py-2 rounded-lg font-semibold">Create Ticket</button>
                 <NotificationBell />
                 <div className="flex items-center space-x-2">
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600">{user?.name.charAt(0).toUpperCase()}</div>
                     <span className="font-semibold text-gray-700">{user?.name}</span>
-                    <ChevronDownIcon className="h-5 w-5 text-gray-500" />
                 </div>
             </div>
         </header>

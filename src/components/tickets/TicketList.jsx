@@ -7,7 +7,6 @@ import ConfirmationModal from './ConfirmationModal';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 
-// Fonction pour générer une couleur d'avatar dynamique
 const getAvatarColor = (name) => {
     if (!name) return 'bg-gray-200 text-gray-600';
     const colors = [
@@ -20,7 +19,7 @@ const getAvatarColor = (name) => {
     return colors[index];
 };
 
-const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
+const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed, newlyUpdatedTicketId }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -28,6 +27,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleTicketClick = (ticketId) => {
+        onTicketViewed(ticketId);
         navigate(`/tickets/${ticketId}`);
     };
 
@@ -47,7 +47,8 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                 onTicketDeleted(ticketToDelete);
             }
         } catch (err) {
-            toast.error(err.message)
+            console.error("Erreur lors de la suppression :", err.message);
+            toast.error(err.message);
         } finally {
             setIsDeleting(false);
             setDeleteModalOpen(false);
@@ -80,6 +81,8 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
         );
     }
 
+    console.log('Tickets affichés:', tickets); 
+
     return (
         <>
             <div className="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
@@ -98,10 +101,11 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                         <tbody className="text-gray-700 divide-y divide-gray-100">
                             {tickets.map((ticket) => {
                                 const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
+                                const isUpdated = ticket.id === newlyUpdatedTicketId;
                                 return (
                                     <tr
                                         key={ticket.id}
-                                        className="hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                                        className={`hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'font-bold bg-yellow-50 animate-pulse' : ''}`}
                                         onClick={() => handleTicketClick(ticket.id)}
                                         role="button"
                                         aria-label={`Voir le ticket TKT-${ticket.id}`}
@@ -116,7 +120,9 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                                                     {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-sm text-gray-800">{ticket.title}</p>
+                                                    <p className={`font-semibold text-sm text-gray-800 ${isUpdated ? 'font-bold' : ''}`}>
+                                                        {ticket.title}
+                                                    </p>
                                                     <p className="text-xs text-gray-500">
                                                         TKT-{ticket.id} • Par {ticket.createur?.name || 'Inconnu'}
                                                     </p>
@@ -157,15 +163,14 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                     </table>
                 </div>
             </div>
-
-            {/* Cartes pour mobile */}
             <div className="md:hidden space-y-4">
                 {tickets.map((ticket) => {
                     const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
+                    const isUpdated = ticket.id === newlyUpdatedTicketId;
                     return (
                         <div
                             key={ticket.id}
-                            className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                            className={`bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'border-l-4 border-orange-500 font-bold animate-pulse' : ''}`}
                             onClick={() => handleTicketClick(ticket.id)}
                             role="button"
                             aria-label={`Voir le ticket TKT-${ticket.id}`}
@@ -180,13 +185,16 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                                         {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-sm text-gray-800">TKT-{ticket.id}</p>
-                                        <p className="text-xs text-gray-500">{ticket.createur?.name || 'Inconnu'}</p>
+                                        <p className={`font-semibold text-sm text-gray-800 ${isUpdated ? 'font-bold' : ''}`}>
+                                            {ticket.title}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            TKT-{ticket.id} • Par {ticket.createur?.name || 'Inconnu'}
+                                        </p>
                                     </div>
                                 </div>
                                 <StatusBadge type="status" value={ticket.statut} />
                             </div>
-                            <div className="text-sm text-gray-900 font-medium mb-2">{ticket.title}</div>
                             <div className="text-sm text-gray-600 mb-1">
                                 Catégorie : <StatusBadge value={ticket.categorie} />
                             </div>
@@ -216,7 +224,6 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted }) => {
                     );
                 })}
             </div>
-
             <ConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}

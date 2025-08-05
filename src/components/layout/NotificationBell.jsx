@@ -104,10 +104,9 @@ const NotificationBell = () => {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Bouton cloche avec animation */}
-            <button 
-                onClick={handleToggle} 
-                className="relative p-2 rounded-full hover:bg-orange-50 focus:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all duration-200"
+            <button
+                onClick={handleToggle}
+                className="relative p-2 rounded-full hover:bg-orange-50 focus:bg-orange-50  transition-all duration-200"
             >
                 <BellIcon className={`h-6 w-6 transition-colors duration-200 ${unreadCount > 0 ? 'text-orange-600' : 'text-gray-600'}`} />
                 {unreadCount > 0 && (
@@ -118,12 +117,11 @@ const NotificationBell = () => {
             </button>
 
             {/* Dropdown simple */}
-            <div className={`absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border z-50 transition-all duration-200 ease-out ${
-                isOpen 
-                    ? 'opacity-100 translate-y-0' 
+            <div className={`absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl  z-50 transition-all duration-200 ease-out ${isOpen
+                    ? 'opacity-100 translate-y-0'
                     : 'opacity-0 -translate-y-2 pointer-events-none'
-            }`}>
-                
+                }`}>
+
                 {/* Header simple */}
                 <div className="p-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
@@ -131,7 +129,7 @@ const NotificationBell = () => {
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
-                                className="text-sm text-orange-600 hover:text-orange-700 hover:underline"
+                                className="text-sm text-orange-400 hover:text-orange-300 hover:underline"
                             >
                                 Tout marquer comme lu
                             </button>
@@ -154,27 +152,25 @@ const NotificationBell = () => {
                                         <button
                                             key={notif.id}
                                             onClick={() => handleNotificationClick(notif)}
-                                            className={`w-full text-left p-3 transition-colors ${
-                                                !notif.read_at 
-                                                    ? 'bg-orange-50 hover:bg-orange-100' 
+                                            className={`w-full text-left p-3 transition-colors ${!notif.read_at
+                                                    ? 'bg-orange-50 hover:bg-orange-100'
                                                     : 'hover:bg-gray-50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border shadow-sm">
+                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
                                                     {getNotificationIcon(notif.data?.type)}
                                                 </div>
                                                 <div className="flex-grow">
                                                     <p className="text-sm text-gray-700">{notif.data?.message}</p>
-                                                    <p className={`text-xs mt-1 ${
-                                                        !notif.read_at ? 'text-orange-600 font-semibold' : 'text-gray-500'
-                                                    }`}>
+                                                    <p className={`text-xs mt-1 ${!notif.read_at ? 'text-orange-600 font-semibold' : 'text-gray-500'
+                                                        }`}>
                                                         {formatRelativeDate(notif.created_at)}
                                                     </p>
                                                 </div>
                                                 {!notif.read_at && (
-                                                    <div className="h-2.5 w-2.5 rounded-full bg-orange-500 flex-shrink-0 self-center" 
-                                                         title="Non lue">
+                                                    <div className="h-2.5 w-2.5 rounded-full bg-orange-500 flex-shrink-0 self-center"
+                                                        title="Non lue">
                                                     </div>
                                                 )}
                                             </div>
@@ -199,9 +195,9 @@ const NotificationBell = () => {
                 {/* Footer */}
                 {notifications.length > 0 && (
                     <div className="border-t border-gray-100 bg-gray-50 rounded-b-xl">
-                        <button 
-                            onClick={() => { navigate('/notifications'); setIsOpen(false); }} 
-                            className="block w-full text-center p-4 text-sm font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-b-xl transition-colors duration-200"
+                        <button
+                            onClick={() => { navigate('/notifications'); setIsOpen(false); }}
+                            className="block w-full text-center p-4 text-sm font-semibold text-orange-400 hover:text-orange-300 hover:bg-orange-50 rounded-b-xl transition-colors duration-200"
                         >
                             Voir toutes les notifications →
                         </button>

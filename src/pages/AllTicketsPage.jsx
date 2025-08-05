@@ -5,12 +5,15 @@ import TicketList from '../components/tickets/TicketList';
 import ticketService from '../services/ticketService';
 import userService from '../services/userService';
 import echo from '../services/echo';
+import CreateTicketModal from '../components/tickets/CreateTicketModal';
 
 const AllTicketsPage = () => {
     const [tickets, setTickets] = useState([]);
     const [agents, setAgents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isModalOpen, setModalOpen] = useState(false);
+
 
     const initialFilters = {
         search: '',
@@ -110,6 +113,14 @@ const AllTicketsPage = () => {
         setFilters(initialFilters);
     };
 
+    const handleTicketCreated = (newTicket) => {
+        setTickets(prev => {
+            if (prev.some(t => t.id === newTicket.id)) return prev;
+            return [newTicket, ...prev];
+        });
+        toast.success(`Votre ticket #${newTicket.id} a été créé avec succès.`);
+    }
+
     const filteredTickets = tickets.filter(ticket =>
         (filters.search === '' ||
             ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -121,8 +132,11 @@ const AllTicketsPage = () => {
     );
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold mb-4">Tous les tickets</h1>
+        <div className='container mx-auto p-4 sm:p-6 lg:p-8'>
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">Tous les tickets</h1>
+                
+            </div>            
             <TicketFilters
                 filters={filters}
                 setFilters={setFilters}
@@ -133,6 +147,11 @@ const AllTicketsPage = () => {
                 tickets={filteredTickets}
                 isLoading={isLoading}
                 error={error}
+            />
+            <CreateTicketModal
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+                onSuccess={handleTicketCreated}
             />
         </div>
     );

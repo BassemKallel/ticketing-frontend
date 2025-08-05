@@ -18,7 +18,7 @@ const groupNotificationsByDate = (notifications) => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
 
-    const isSameDay = (d1, d2) => 
+    const isSameDay = (d1, d2) =>
         d1.getFullYear() === d2.getFullYear() &&
         d1.getMonth() === d2.getMonth() &&
         d1.getDate() === d2.getDate();
@@ -72,10 +72,10 @@ const formatRelativeDate = (dateString) => {
 };
 
 const NotificationsPage = () => {
-    const { 
-        notifications, 
+    const {
+        notifications,
         unreadCount,
-        markAllAsRead, 
+        markAllAsRead,
         markOneAsRead,
         fetchNotifications,
         isLoading
@@ -84,10 +84,10 @@ const NotificationsPage = () => {
 
     useEffect(() => {
         fetchNotifications();
-        
+
         // WebSocket listener (adaptez selon votre implémentation)
         const channel = window.Echo?.private(`App.Models.User.${user?.id}`);
-        
+
         if (channel) {
             channel.listen('.notification.created', (data) => {
                 fetchNotifications();
@@ -126,9 +126,8 @@ const NotificationsPage = () => {
     return (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
             {/* Header */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold text-gray-800">Notifications</h1>
+                <div className="flex justify-between items-center mb-10">
+                    <h1 className="text-3xl font-bold text-gray-800">Notifications</h1>
                     {unreadCount > 0 && (
                         <div className="flex items-center gap-4">
                             <span className="text-sm text-gray-600">
@@ -143,15 +142,14 @@ const NotificationsPage = () => {
                         </div>
                     )}
                 </div>
-            </div>
 
             {/* Liste des notifications */}
             <div className="bg-white rounded-lg shadow">
                 {notifications.length > 0 ? (
-                    Object.entries(groupedNotifications).map(([groupName, groupNotifications]) => 
+                    Object.entries(groupedNotifications).map(([groupName, groupNotifications]) =>
                         groupNotifications.length > 0 && (
                             <div key={groupName}>
-                                <div className="px-6 py-4 border-b border-gray-100">
+                                <div className="bg-gray-50 text-gray-700 px-6 py-4 border-b border-gray-100">
                                     <h2 className="text-sm font-bold uppercase text-gray-500 tracking-wider">
                                         {groupName}
                                     </h2>
@@ -161,29 +159,27 @@ const NotificationsPage = () => {
                                         <button
                                             key={notif.id}
                                             onClick={() => handleNotificationClick(notif)}
-                                            className={`w-full text-left p-6 transition-colors ${
-                                                !notif.read_at 
-                                                    ? 'bg-orange-50 hover:bg-orange-100' 
+                                            className={`w-full text-left p-6 transition-colors ${!notif.read_at
+                                                    ? 'bg-orange-50 hover:bg-orange-100'
                                                     : 'hover:bg-gray-50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-start gap-4">
-                                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border shadow-sm">
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                                                     {getNotificationIcon(notif.data?.type)}
                                                 </div>
                                                 <div className="flex-grow">
                                                     <p className="text-sm text-gray-700 leading-relaxed">
                                                         {notif.data?.message}
                                                     </p>
-                                                    <p className={`text-xs mt-2 ${
-                                                        !notif.read_at ? 'text-orange-600 font-semibold' : 'text-gray-500'
-                                                    }`}>
+                                                    <p className={`text-xs mt-2 ${!notif.read_at ? 'text-orange-600 font-semibold' : 'text-gray-500'
+                                                        }`}>
                                                         {formatRelativeDate(notif.created_at)}
                                                     </p>
                                                 </div>
                                                 {!notif.read_at && (
-                                                    <div className="h-2.5 w-2.5 rounded-full bg-orange-500 flex-shrink-0 self-center" 
-                                                         title="Non lue">
+                                                    <div className="h-2.5 w-2.5 rounded-full bg-orange-500 flex-shrink-0 self-center"
+                                                        title="Non lue">
                                                     </div>
                                                 )}
                                             </div>

@@ -42,7 +42,7 @@ const AssignTicketModal = ({ isOpen, onClose, ticketId, agents, onSuccess }) => 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="agent" className="block text-sm font-medium text-gray-700">Select Agent</label>
-                    <select id="agent" value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    <select id="agent" value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-400 focus:ring-orange-400 sm:text-sm">
                         <option value="">Select an agent</option>
                         {agents.map(agent => (
                             <option key={agent.id} value={agent.id}>{agent.name}</option>

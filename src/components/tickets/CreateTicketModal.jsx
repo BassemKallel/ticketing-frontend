@@ -11,8 +11,7 @@ const CreateTicketModal = ({ isOpen, onClose }) => {
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Classes CSS réutilisables
-    const inputClass = 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm';
+    const inputClass = 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-400 focus:ring-orange-300 sm:text-sm';
     const labelClass = 'block text-sm font-medium text-gray-700';
     const buttonClass = 'rounded-md border py-2 px-4 text-sm font-medium shadow-sm transition-colors duration-100';
 
@@ -89,7 +88,7 @@ const CreateTicketModal = ({ isOpen, onClose }) => {
                         <div className="space-y-1 text-center">
                             <PaperClipIcon className="mx-auto h-12 w-12 text-gray-400" />
                             <div className="flex text-sm text-gray-600">
-                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500">
+                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-orange-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-orange-400 focus-within:ring-offset-2 hover:text-orange-500">
                                     <span>Upload a file</span>
                                     <input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
                                 </label>

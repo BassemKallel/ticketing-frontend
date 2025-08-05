@@ -70,14 +70,12 @@ const TicketDetailPage = () => {
         if (user) fetchInitialData();
     }, [id, user, fetchTicket]);
 
-    // Marque le ticket comme lu lors de l'ouverture de la page
     useEffect(() => {
         if (id) {
             markTicketAsRead(parseInt(id, 10));
         }
     }, [id, markTicketAsRead]);
 
-    // --- LOGIQUE WEBSOCKET POUR LA PAGE ENTIÈRE ---
     useEffect(() => {
         if (!id || !user) return;
 
@@ -99,7 +97,6 @@ const TicketDetailPage = () => {
             });
         };
 
-        // Écouteur pour la SUPPRESSION d'un commentaire
         const handleCommentDeleted = (event) => {
             console.log('[WebSocket] Événement reçu: commentaire.supprime', event);
             setTicket(prev => {
@@ -129,26 +126,21 @@ const TicketDetailPage = () => {
             });
         };
 
-        // Écouteur pour la SUPPRESSION d'une pièce jointe
         const handleAttachmentDeleted = (event) => {
             console.log('[WebSocket] Événement reçu: piecejointe.supprimee', event);
             setTicket(prev => {
                 if (!prev) return null;
                 return {
                     ...prev,
-                    pieces_jointes: prev.pieces_jointes.filter(pj => pj.id !== event.pieceJointeId)
+                    pieces_jointes: prev.pieces_jointes.filter(pj => pj.id !== event.piece_jointe_id)
                 }
             });
         };
 
-        // Écouteur pour la MISE À JOUR générale du ticket (statut, agent)
         const handleTicketUpdated = (event) => {
-            console.log('[WebSocket] Événement reçu: ticket.mis_a_jour', event);
-            toast.info(`Le ticket #${event.ticket.id} a été mis à jour.`);
-            setTicket(prev => ({ ...prev, ...event.ticket }));
+            fetchTicket();
         };
 
-        // On attache tous les écouteurs
         channel
             .listen('.commentaire.ajoute', handleCommentAdded)
             .listen('.commentaire.supprime', handleCommentDeleted)
@@ -156,9 +148,7 @@ const TicketDetailPage = () => {
             .listen('.piecejointe.supprimee', handleAttachmentDeleted)
             .listen('.ticket.mis_a_jour', handleTicketUpdated);
 
-        // Fonction de nettoyage pour se désabonner
         return () => {
-            console.log(`[WebSocket] Déconnexion du canal du ticket : ticket.${id}`);
             channel
                 .stopListening('.commentaire.ajoute', handleCommentAdded)
                 .stopListening('.commentaire.supprime', handleCommentDeleted)
@@ -172,7 +162,6 @@ const TicketDetailPage = () => {
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        console.log('Ticket mis à jour:', ticket);
     }, [ticket]);
 
     const handleFormSubmit = async (e) => {
@@ -192,7 +181,7 @@ const TicketDetailPage = () => {
                 // Mise à jour optimiste pour l'expéditeur
                 setTicket(prev => ({ ...prev, pieces_jointes: [...prev.pieces_jointes, response.piece_jointe] }));
             }
-            toast.update(submittingToast, { render: "Réponse envoyée !", type: "success", isLoading: false, autoClose: 3000 });
+            toast.update(submittingToast, { render: "Réponse envoyée !", type: "success", isLoading: false, autoClose: 2000 });
             setNewComment('');
             setNewFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
@@ -212,10 +201,8 @@ const TicketDetailPage = () => {
             let response;
             if (type === 'commentaire') {
                 response = await commentaireService.delete(itemId);
-                // La mise à jour de l'UI se fera via WebSocket pour tous les utilisateurs
             } else if (type === 'pièce jointe') {
                 response = await pieceJointeService.delete(itemId);
-                // La mise à jour de l'UI se fera via WebSocket pour tous les utilisateurs
             }
             toast.update(deletingToast, { render: response?.message || "Élément supprimé !", type: "success", isLoading: false, autoClose: 3000 });
         } catch (err) {
@@ -304,7 +291,7 @@ const TicketDetailPage = () => {
                             <div className="flex justify-between items-center mt-1">
                                 <StatusBadge type="status" value={ticket.statut} />
                                 {(user?.id === ticket.agent_id || user?.role === 'admin') &&
-                                    (<button onClick={() => setStatusModalOpen(true)} className="text-sm text-blue-600 font-semibold hover:underline">Changer</button>)
+                                    (<button onClick={() => setStatusModalOpen(true)} className="text-sm text-orange-400 font-semibold hover:underline">Changer</button>)
                                 }
                             </div>
                         </div>
@@ -318,7 +305,7 @@ const TicketDetailPage = () => {
                             <div className="flex justify-between items-center mt-1">
                                 <span className="font-semibold text-gray-800">{ticket.agent?.name || 'Non assigné'}</span>
                                 {user?.role === 'admin' &&
-                                    (<button onClick={() => setAssignModalOpen(true)} className="text-sm text-blue-600 font-semibold hover:underline">Assigner</button>)
+                                    (<button onClick={() => setAssignModalOpen(true)} className="text-sm text-orange-400 font-semibold hover:underline">Assigner</button>)
                                 }
                             </div>
                         </div>

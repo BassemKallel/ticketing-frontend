@@ -18,7 +18,7 @@ const Sidebar = () => {
     const visibleLinks = allLinks.filter(link => link.roles.includes(user?.role));
 
     return (
-        <aside className="bg-[#1e293b] text-white w-64 flex-shrink-0 flex flex-col">
+        <aside className="bg-[#243247] text-white w-64 flex-shrink-0 flex flex-col">
             <div className="h-20 flex items-center justify-center text-2xl font-bold">
                 TikTak Pro
             </div>

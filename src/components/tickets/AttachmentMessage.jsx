@@ -4,8 +4,6 @@ import { PaperClipIcon, TrashIcon } from '@heroicons/react/24/outline';
 const AttachmentMessage = ({ attachment, currentUser, onDeleteRequest }) => {
     if (!attachment || !attachment.auteur) return null;
 
-    console.log('AttachmentMessage props:', { attachment, currentUser });
-
     const isCurrentUser = String(attachment.auteur.id) === String(currentUser.id);
     const isTeamMember = ['admin', 'agent'].includes(attachment.auteur.role);
     const canDelete = isCurrentUser || currentUser.role === 'admin';
