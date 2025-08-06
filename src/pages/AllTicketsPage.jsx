@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import TicketFilters from '../components/tickets/TicketFilters';
 import TicketList from '../components/tickets/TicketList';
@@ -13,7 +13,15 @@ const AllTicketsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setModalOpen] = useState(false);
-
+    // État pour mémoriser l'ID du ticket avec une nouvelle activité
+    const [unreadTicketIds, setUnreadTicketIds] = useState(() => {
+        try {
+            const savedUnread = localStorage.getItem('unreadAllTickets');
+            return savedUnread ? new Set(JSON.parse(savedUnread)) : new Set();
+        } catch (error) {
+            return new Set();
+        }
+    });
 
     const initialFilters = {
         search: '',
@@ -39,87 +47,84 @@ const AllTicketsPage = () => {
                 setIsLoading(false);
             }
         };
-
         loadData();
     }, []);
 
     useEffect(() => {
+        localStorage.setItem('unreadAllTickets', JSON.stringify(Array.from(unreadTicketIds)));
+    }, [unreadTicketIds]);
+
+    // Effet pour écouter tous les événements WebSocket pertinents
+    useEffect(() => {
         const channel = echo.private('team');
 
-        channel.error((error) => {
-            console.error('Erreur WebSocket team:', error);
-            toast.error('Erreur de connexion WebSocket');
-        });
 
-        // Création
-        channel.listen('.ticket.cree', (event) => {
+
+        // Handler pour un nouveau ticket
+        const handleTicketCreated = (event) => {
             if (event.ticket?.id) {
-                const newTicket = {
-                    ...event.ticket,
-                    statut: event.ticket.statut || '',
-                    categorie: event.ticket.categorie || '',
-                    agent_id: event.ticket.agent_id || null,
-                    createur: event.ticket.createur ? {
-                        id: event.ticket.createur.id,
-                        name: event.ticket.createur.name
-                    } : null,
-                    agent: event.ticket.agent ? {
-                        id: event.ticket.agent.id,
-                        name: event.ticket.agent.name
-                    } : null
-                };
-                setTickets(prev => [newTicket, ...prev]);
-                toast.success(`Nouveau ticket #${newTicket.id}`);
+                setTickets(prev => [event.ticket, ...prev]);
             }
-        });
+        };
 
-        channel.listen('.ticket.mis_a_jour', (event) => {
-            console.log('TicketMisAJour reçu:', event);
-
-            if (event.ticket?.id) {
-                const updatedTicket = {
-                    ...event.ticket,
-                    statut: event.ticket.statut,
-                    categorie: event.ticket.categorie,
-                    agent_id: event.ticket.agent_id,
-                    createur: event.ticket.createur,
-                    agent: event.ticket.agent
-                };
-
-                setTickets(prevTickets =>
-                    prevTickets.map(t =>
-                        t.id === updatedTicket.id ? updatedTicket : t
-                    )
-                );
-
-                toast.success(`Ticket #${updatedTicket.id} mis à jour`);
-            }
-        });
-
-        channel.listen('.ticket.supprime', (event) => {
+        // Handler pour la suppression d'un ticket
+        const handleTicketDeleted = (event) => {
             if (event.ticketId) {
                 setTickets(prev => prev.filter(t => t.id !== event.ticketId));
             }
-        });
+        };
+
+        const handleTicketActivity = (event) => {
+            const ticket = event.ticket;
+            let ticketIdToUpdate = null;
+
+            if (ticket?.id) {
+                ticketIdToUpdate = ticket.id;
+                setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, ...ticket } : t));
+            }
+
+            if (ticketIdToUpdate) {
+                setUnreadTicketIds(prevSet => {
+                    const newSet = new Set(prevSet);
+                    newSet.add(ticketIdToUpdate);
+                    return newSet;
+                });
+            }
+        };
+
+        channel
+            .listen('.ticket.cree', handleTicketCreated)
+            .listen('.ticket.supprime', handleTicketDeleted)
+            .listen('.ticket.mis_a_jour', handleTicketActivity)
+            .listen('.commentaire.ajoute', handleTicketActivity)
+            .listen('.piecejointe.ajoutee', handleTicketActivity);
 
         return () => {
-            channel.stopListening('.ticket.cree');
-            channel.stopListening('.ticket.mis_a_jour');
-            channel.stopListening('.ticket.supprime');
+            channel
+                .stopListening('.ticket.cree', handleTicketCreated)
+                .stopListening('.ticket.supprime', handleTicketDeleted)
+                .stopListening('.ticket.mis_a_jour', handleTicketActivity)
+                .stopListening('.commentaire.ajoute', handleTicketActivity)
+                .stopListening('.piecejointe.ajoutee', handleTicketActivity);
             echo.leave('team');
         };
     }, []);
+
     const handleResetFilters = () => {
         setFilters(initialFilters);
     };
 
-    const handleTicketCreated = (newTicket) => {
-        setTickets(prev => {
-            if (prev.some(t => t.id === newTicket.id)) return prev;
-            return [newTicket, ...prev];
+    const handleNewTicketSuccess = (newTicket) => {
+        setTickets(prev => [newTicket, ...prev]);
+    };
+
+    const handleTicketViewed = useCallback((ticketId) => {
+        setUnreadTicketIds(prevSet => {
+            const newSet = new Set(prevSet);
+            newSet.delete(ticketId);
+            return newSet;
         });
-        toast.success(`Votre ticket #${newTicket.id} a été créé avec succès.`);
-    }
+    }, []);
 
     const filteredTickets = tickets.filter(ticket =>
         (filters.search === '' ||
@@ -135,8 +140,7 @@ const AllTicketsPage = () => {
         <div className='container mx-auto p-4 sm:p-6 lg:p-8'>
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Tous les tickets</h1>
-                
-            </div>            
+            </div>
             <TicketFilters
                 filters={filters}
                 setFilters={setFilters}
@@ -147,11 +151,14 @@ const AllTicketsPage = () => {
                 tickets={filteredTickets}
                 isLoading={isLoading}
                 error={error}
+                onTicketDeleted={(ticketId) => setTickets(prev => prev.filter(t => t.id !== ticketId))}
+                onTicketViewed={handleTicketViewed}
+                unreadTicketIds={unreadTicketIds}
             />
             <CreateTicketModal
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
-                onSuccess={handleTicketCreated}
+                onSuccess={handleNewTicketSuccess}
             />
         </div>
     );

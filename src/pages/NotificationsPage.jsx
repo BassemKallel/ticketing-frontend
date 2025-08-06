@@ -115,10 +115,8 @@ const NotificationsPage = () => {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-                <div className="bg-white rounded-lg shadow p-8 text-center">
-                    <div className="text-sm text-gray-500">Chargement des notifications...</div>
-                </div>
+            <div className="flex justify-center items-center py-10">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-400"></div>
             </div>
         );
     }

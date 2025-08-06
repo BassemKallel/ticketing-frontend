@@ -1,12 +1,14 @@
 import React from 'react';
 import UserTableRow from './UserTableRow';
 
+
+
 const UserTable = ({ users, currentUser, onViewUser, onEditUser, onDeleteUser }) => (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="overflow-x-auto">
             <table className="w-full text-left">
                 <thead className="bg-gray-50">
-                    <tr className="text-gray-600 uppercase text-xs font-semibold">
+                    <tr className="text-gray-600 uppercase text-xs font-bold">
                         <th className="px-5 py-4 font-semibold">Utilisateur</th>
                         <th className="px-5 py-4 font-semibold">Rôle</th>
                         <th className="px-5 py-4 font-semibold">Date de création</th>

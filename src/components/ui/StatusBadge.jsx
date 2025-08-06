@@ -1,9 +1,9 @@
 const StatusBadge = ({ type, value }) => {
     const statusColors = {
-        'Ouvert': 'bg-orange-100 text-orange-600',
-        'En_cours': 'bg-blue-100 text-blue-600',
-        'Resolu': 'bg-green-100 text-green-600',
-        'Ferme': 'bg-red-100 text-red-600'
+        'Ouvert': 'bg-red-100 text-red-600',
+        'En_cours': 'bg-orange-100 text-orange-600',
+        'Resolu': 'bg-blue-100 text-blue-600',
+        'Fermé': 'bg-green-100 text-green-600'
     };
     
     const priorityColors = {

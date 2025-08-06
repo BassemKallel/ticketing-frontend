@@ -159,7 +159,6 @@ const TicketDetailPage = () => {
         };
     }, [id, user]);
 
-
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [ticket]);
@@ -171,14 +170,12 @@ const TicketDetailPage = () => {
         try {
             if (newComment.trim()) {
                 const response = await commentaireService.create(id, { contenu: newComment });
-                // Mise à jour optimiste pour l'expéditeur
                 setTicket(prev => ({ ...prev, commentaires: [...prev.commentaires, response.commentaire] }));
             }
             if (newFile) {
                 const formData = new FormData();
                 formData.append('fichier', newFile);
                 const response = await pieceJointeService.create(id, formData);
-                // Mise à jour optimiste pour l'expéditeur
                 setTicket(prev => ({ ...prev, pieces_jointes: [...prev.pieces_jointes, response.piece_jointe] }));
             }
             toast.update(submittingToast, { render: "Réponse envoyée !", type: "success", isLoading: false, autoClose: 2000 });
@@ -234,7 +231,6 @@ const TicketDetailPage = () => {
     return (
         <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Le JSX reste identique */}
                 <div className="lg:col-span-2 flex flex-col space-y-6">
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold text-gray-800">{ticket.title}</h2>
@@ -275,7 +271,7 @@ const TicketDetailPage = () => {
                                     <PaperClipIcon className="h-6 w-6" />
                                 </button>
                                 <input type="file" ref={fileInputRef} onChange={(e) => setNewFile(e.target.files[0])} className="hidden" />
-                                <button type="submit" className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:bg-orange-600 flex items-center">
+                                <button type="submit" className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:bg-orange-600 flex items-center transition-colors">
                                     Envoyer
                                     <PaperAirplaneIcon className="h-5 w-5 ml-2 -rotate-45" />
                                 </button>
@@ -283,39 +279,99 @@ const TicketDetailPage = () => {
                         </form>
                     </div>
                 </div>
+
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="font-bold text-gray-800 text-lg">Informations du Ticket</h3>
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-500">Statut</p>
-                            <div className="flex justify-between items-center mt-1">
-                                <StatusBadge type="status" value={ticket.statut} />
-                                {(user?.id === ticket.agent_id || user?.role === 'admin') &&
-                                    (<button onClick={() => setStatusModalOpen(true)} className="text-sm text-orange-400 font-semibold hover:underline">Changer</button>)
-                                }
+                    <div className="bg-white rounded-xl shadow-lg border-0 overflow-hidden">
+                        <div className="bg-gray-50 px-6 py-4">
+                            <h3 className="font-semibold text-gray-950 text-lg">Informations du Ticket</h3>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600 mb-1">Statut</p>
+                                    <StatusBadge type="status" value={ticket.statut} />
+                                </div>
+                                {(user?.id === ticket.agent_id || user?.role === 'admin') && (
+                                    <button
+                                        onClick={() => setStatusModalOpen(true)}
+                                        className="px-4 py-2 bg-orange-400 text-white text-sm font-medium rounded-lg hover:bg-orange-300 transition-colors"
+                                    >
+                                        Modifier
+                                    </button>
+                                )}
                             </div>
-                        </div>
-                        <div className="mt-4 border-t pt-4 space-y-3 text-sm">
-                            <div className="flex items-center"><TicketIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">ID:</span><span className="font-semibold text-gray-800 ml-2">TKT-{ticket.id}</span></div>
-                            <div className="flex items-center"><StarIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">Categorie:</span><span className="font-semibold text-red-500 ml-2">{ticket.categorie}</span></div>
-                            <div className="flex items-center"><ClockIcon className="h-5 w-5 text-gray-400 mr-3" /><span className="text-gray-500">Mise à jour:</span><span className="font-semibold text-gray-800 ml-2">{new Date(ticket.updated_at).toLocaleDateString()}</span></div>
-                        </div>
-                        <div className="mt-4 border-t pt-4">
-                            <p className="text-sm text-gray-500">Assigné à</p>
-                            <div className="flex justify-between items-center mt-1">
-                                <span className="font-semibold text-gray-800">{ticket.agent?.name || 'Non assigné'}</span>
-                                {user?.role === 'admin' &&
-                                    (<button onClick={() => setAssignModalOpen(true)} className="text-sm text-orange-400 font-semibold hover:underline">Assigner</button>)
-                                }
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div className="flex items-center">
+                                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                                        <span className="text-sm font-medium text-gray-600">ID Ticket</span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-900">TKT-{ticket.id}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div className="flex items-center">
+                                        <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                                        <span className="text-sm font-medium text-gray-600">Catégorie</span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-red-600">
+                                        {ticket.categorie}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div className="flex items-center">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                        <span className="text-sm font-medium text-gray-600">Mise à jour</span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-900">
+                                        {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mt-4 border-t pt-4">
-                            <p className="text-sm text-gray-500">Créé par</p>
-                            <div className="flex items-center mt-2">
-                                <div className="h-8 w-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center font-bold text-gray-600">{ticket.createur?.name?.charAt(0) || '?'}</div>
-                                <div className="ml-3">
-                                    <p className="font-semibold text-gray-800">{ticket.createur?.name || "Inconnu"}</p>
-                                    <p className="text-xs text-gray-500">Créé le {new Date(ticket.created_at).toLocaleDateString()}</p>
+
+                            {/* Assigné à avec style orange */}
+                            <div className="bg-gray-50 p-4 rounded-xl border border-orange-100">
+                                <div className="flex items-center justify-between mb-2">
+                                    <p className="text-sm font-medium text-orange-500">Assigné à</p>
+                                    {user?.role === 'admin' && (
+                                        <button
+                                            onClick={() => setAssignModalOpen(true)}
+                                            className="text-sm text-orange-500 hover:text-orange-600 font-medium underline-offset-2 hover:underline"
+                                        >
+                                            Réassigner
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="font-semibold text-gray-900 text-lg">{ticket.agent?.name || 'Non assigné'}</p>
+                            </div>
+
+                            {/* Créé par avec avatar orange */}
+                            <div className="bg-gray-50 p-4 rounded-xl border border-orange-100">
+                                <p className="text-sm font-medium text-orange-500 mb-3">Créé par</p>
+                                <div className="flex items-center">
+                                    <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold shadow-lg">
+                                        {ticket.createur?.name?.charAt(0)?.toUpperCase() || '?'}
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="font-semibold text-gray-900 text-lg">{ticket.createur?.name || "Inconnu"}</p>
+                                        <p className="text-sm text-gray-600">
+                                            {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +379,6 @@ const TicketDetailPage = () => {
                 </div>
             </div>
 
-            {/* Modales */}
             <AssignTicketModal isOpen={isAssignModalOpen} onClose={() => setAssignModalOpen(false)} ticketId={ticket.id} agents={agents} onSuccess={fetchTicket} />
             <ChangeStatusModal isOpen={isStatusModalOpen} onClose={() => setStatusModalOpen(false)} ticket={ticket} onSuccess={fetchTicket} />
             <ConfirmationModal

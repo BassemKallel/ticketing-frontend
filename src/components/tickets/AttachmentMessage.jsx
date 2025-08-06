@@ -1,19 +1,56 @@
-import React from 'react';
-import { PaperClipIcon, TrashIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
+import { PaperClipIcon, TrashIcon, ArrowDownTrayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import apiClient from '../../services/apiClient'; // Assurez-vous que apiClient est importé
+import { toast } from 'react-toastify'; // Assurez-vous que toast est importé
 
 const AttachmentMessage = ({ attachment, currentUser, onDeleteRequest }) => {
+    // 1. Définir l'état pour suivre le téléchargement
+    const [isDownloading, setIsDownloading] = useState(false);
+
     if (!attachment || !attachment.auteur) return null;
 
     const isCurrentUser = String(attachment.auteur.id) === String(currentUser.id);
     const isTeamMember = ['admin', 'agent'].includes(attachment.auteur.role);
     const canDelete = isCurrentUser || currentUser.role === 'admin';
-
     const formattedDate = attachment.created_at ? new Date(attachment.created_at).toLocaleString() : 'Date invalide';
-
-    // Si l'utilisateur connecté est admin/agent : lui + autres admin/agent à droite
-    // Si l'utilisateur connecté est client : seul lui à droite
     const currentUserIsTeamMember = ['admin', 'agent'].includes(currentUser.role);
     const isRightAligned = isCurrentUser || (currentUserIsTeamMember && isTeamMember);
+
+    // 2. La logique de téléchargement sécurisé
+    const handleDownload = async (e) => {
+        e.preventDefault(); // Empêche le navigateur de suivre le lien href
+        setIsDownloading(true);
+
+        const downloadUrl = `/pieces-jointes/${attachment.id}/download`;
+
+        try {
+            // Utilise apiClient (axios) pour faire une requête authentifiée
+            const response = await apiClient.get(downloadUrl, {
+                responseType: 'blob', // Important: on attend un fichier
+            });
+
+            // Crée une URL temporaire pour le fichier reçu
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            
+            // Crée un lien <a> caché pour lancer le téléchargement
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', attachment.nom_fichier); // Donne le nom de fichier original
+            
+            document.body.appendChild(link);
+            link.click(); // Simule le clic pour télécharger
+            
+            // Nettoyage
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Erreur de téléchargement:", error);
+            toast.error("Le téléchargement a échoué. Vous n'avez peut-être pas les droits.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     return (
         <div className={`group flex w-full max-w-lg items-start gap-3 ${isRightAligned ? 'ml-auto justify-end' : 'mr-auto justify-start'}`}>
@@ -28,25 +65,32 @@ const AttachmentMessage = ({ attachment, currentUser, onDeleteRequest }) => {
                     <p className="font-bold">{attachment.auteur.name}</p>
                     <p className={`${isRightAligned ? 'text-orange-100' : 'text-gray-500'}`}>{formattedDate}</p>
                 </div>
+                
+                {/* 3. Le lien a été corrigé pour appeler handleDownload au clic */}
                 <a
-                    href={`http://127.0.0.1:8000/storage/${attachment.chemin}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={attachment.chemin ? `Ouvrir ${attachment.nom_fichier}` : 'URL non disponible'}
-                    onClick={() => console.log('URL:', `http://127.0.0.1:8000/storage/${attachment.chemin}`, 'Chemin:', attachment.chemin)}
-                    className={`flex items-center gap-3 p-2 rounded-md transition-colors ${attachment.chemin
-                        ? (isRightAligned ? 'bg-orange-400 hover:bg-orange-300' : 'bg-gray-200 hover:bg-gray-300')
-                        : 'cursor-not-allowed text-gray-400'
+                    href={`/pieces-jointes/${attachment.id}/download`} // href symbolique
+                    onClick={handleDownload} // La logique est ici
+                    title={`Télécharger ${attachment.nom_fichier}`}
+                    className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                        isRightAligned ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-200 hover:bg-gray-300'
                     }`}
                 >
-                    <PaperClipIcon className={`h-6 w-6 flex-shrink-0 ${isRightAligned ? 'text-orange-100' : 'text-gray-600'}`} />
+                    {isDownloading ? (
+                        <ArrowPathIcon className={`h-6 w-6 flex-shrink-0 animate-spin ${isRightAligned ? 'text-white' : 'text-gray-600'}`} />
+                    ) : (
+                        <ArrowDownTrayIcon className={`h-6 w-6 flex-shrink-0 ${isRightAligned ? 'text-white' : 'text-gray-600'}`} />
+                    )}
+
                     <div className="flex-grow text-left">
-                        <p className={`text-sm font-medium break-all ${isRightAligned ? 'text-white' : 'text-gray-800'}`}>{attachment.nom_fichier}</p>
+                        <p className={`text-sm font-medium break-all ${isRightAligned ? 'text-white' : 'text-gray-800'}`}>
+                            {attachment.nom_fichier}
+                        </p>
                         <p className={`text-xs ${isRightAligned ? 'text-orange-100' : 'text-gray-500'}`}>
                             {attachment.taille ? `${(attachment.taille / 1024).toFixed(1)} KB` : ''}
                         </p>
                     </div>
                 </a>
+
                 {canDelete && (
                     <button
                         onClick={() => onDeleteRequest('pièce jointe', attachment.id)}

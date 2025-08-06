@@ -12,8 +12,17 @@ const MyTicketsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setModalOpen] = useState(false);
-    const [newlyUpdatedTicketId, setNewlyUpdatedTicketId] = useState(null); // <-- L'état est ici
-    const initialFilters = { search: '', status: '', priority: '', agent: '' };
+    
+    const [unreadTicketIds, setUnreadTicketIds] = useState(() => {
+        try {
+            const savedUnread = localStorage.getItem('unreadMyTickets');
+            return savedUnread ? new Set(JSON.parse(savedUnread)) : new Set();
+        } catch (error) {
+            return new Set();
+        }
+    });
+
+    const initialFilters = { search: '', status: '', priority: '' };
     const [filters, setFilters] = useState(initialFilters);
     const { user } = useAuth();
 
@@ -25,100 +34,80 @@ const MyTicketsPage = () => {
             const data = await ticketService.getMyTickets();
             setTickets(data);
         } catch (err) {
-            console.error('Erreur lors du chargement des tickets:', err);
             setError(err.message);
-            toast.error("Erreur lors du chargement de vos tickets.");
         } finally {
             setIsLoading(false);
         }
     }, [user?.id]);
 
-    const handleTicketCreated = useCallback((data) => {
-        const newTicket = data.ticket || data;
-        if (!newTicket?.id || (newTicket.user_id !== user.id && newTicket.agent_id !== user.id)) return;
-        setTickets(prev => {
-            if (prev.some(t => t.id === newTicket.id)) return prev;
-            return [newTicket, ...prev];
-        });
-        if (newTicket.user_id === user?.id) {
-            toast.success(`Votre ticket #${newTicket.id} a été créé avec succès.`);
-        } else if (['admin', 'agent'].includes(user?.role)) {
-            toast.info(`Nouveau ticket #${newTicket.id} créé par ${newTicket.createur?.name || 'un utilisateur'}.`);
-        }
-    }, [user?.id, user?.role]);
-
-    const handleTicketUpdated = useCallback((event) => {
-        const updatedTicket = event.ticket || event;
-        if (!updatedTicket?.id || (updatedTicket.user_id !== user.id && updatedTicket.agent_id !== user.id)) return;
-        setTickets(prevTickets =>
-            prevTickets.map(t => t.id === updatedTicket.id ? { ...t, ...updatedTicket } : t)
-        );
-        setNewlyUpdatedTicketId(updatedTicket.id); // <-- Appel correct
-        if (updatedTicket.user_id === user?.id) {
-            toast.info(`Votre ticket #${updatedTicket.id} a été mis à jour.`);
-        } else if (['admin', 'agent'].includes(user?.role)) {
-            toast.info(`Le ticket #${updatedTicket.id} a été mis à jour.`);
-        }
-    }, [user?.id, user?.role]);
-
-    const handleTicketDeleted = useCallback((data) => {
-        const ticketId = data.ticketId || data;
-        if (!ticketId) return;
-        setTickets(prev => prev.filter(t => t.id !== ticketId));
-        toast.info(`Le ticket #${ticketId} a été supprimé.`);
-    }, []);
-
-    const handleNotification = useCallback(() => {
-        fetchMyTickets();
-    }, [fetchMyTickets]);
-
-    const handleCreateSuccess = useCallback((newTicket) => {
-        setModalOpen(false);
-        setTickets(prev => {
-            if (prev.some(t => t.id === newTicket.id)) return prev;
-            return [newTicket, ...prev];
-        });
-        toast.success(`Votre ticket #${newTicket.id} a été créé avec succès.`);
-    }, []);
-
-    const handleTicketViewed = useCallback(() => {
-        setNewlyUpdatedTicketId(null); // <-- La fonction de rappel pour le composant enfant
-    }, []);
+    useEffect(() => {
+        localStorage.setItem('unreadMyTickets', JSON.stringify(Array.from(unreadTicketIds)));
+    }, [unreadTicketIds]);
 
     useEffect(() => {
-        if (user?.id) fetchMyTickets();
+        if (user?.id) {
+            fetchMyTickets();
+        }
     }, [user?.id, fetchMyTickets]);
 
     useEffect(() => {
         if (!user?.id) return;
-        let channels = [];
-        try {
-            if (user.role === 'client') {
-                const userChannelName = `App.Models.User.${user.id}`;
-                const userChannel = echo.private(userChannelName);
-                userChannel.listen('.notification.nouvelle', handleNotification);
-                userChannel.listen('.ticket.mis_a_jour', handleTicketUpdated);
-                channels.push(userChannelName);
-            } else if (['agent', 'admin'].includes(user.role)) {
-                const teamChannelName = 'team';
-                const teamChannel = echo.private(teamChannelName);
-                teamChannel
-                    .listen('.ticket.cree', handleTicketCreated)
-                    .listen('.ticket.mis_a_jour', handleTicketUpdated)
-                    .listen('.ticket.supprime', handleTicketDeleted);
-                channels.push(teamChannelName);
-            }
-        } catch (error) {
-            console.error('[WebSocket] Erreur de connexion:', error);
-        }
-        return () => {
-            channels.forEach(channelName => echo.leave(channelName));
-        };
-    }, [user?.id, user?.role, handleTicketCreated, handleTicketUpdated, handleTicketDeleted, handleNotification]);
 
-    const handleResetFilters = () => {
-        setFilters(initialFilters);
-    };
+        const handleTicketCreated = (event) => {
+            const newTicket = event.ticket;
+            if (newTicket && (String(newTicket.user_id) === String(user.id))) {
+                setTickets(prev => [newTicket, ...prev]);
+            }
+        };
+
+        const handleTicketDeleted = (event) => {
+            const { ticketId } = event;
+            if (ticketId) {
+                setTickets(prev => prev.filter(t => t.id !== ticketId));
+            }
+        };
+
+        const handleTicketUpdated = (event) => {
+            const updatedTicket = event.ticket;
+            if (updatedTicket && tickets.some(t => t.id === updatedTicket.id)) {
+                setTickets(prev => prev.map(t => t.id === updatedTicket.id ? { ...t, ...updatedTicket } : t));
+                setUnreadTicketIds(prevSet => {
+                    const newSet = new Set(prevSet);
+                    newSet.add(updatedTicket.id);
+                    return newSet;
+                });
+            }
+        };
+
+        // --- CORRECTION : On écoute maintenant sur les bons canaux et les bons événements ---
+        let userChannel = echo.private(`App.Models.User.${user.id}`);
+        userChannel
+            .listen('.ticket.cree', handleTicketCreated)
+            .listen('.ticket.supprime', handleTicketDeleted) // Le client écoute la suppression
+            .listen('.ticket.mis_a_jour', handleTicketUpdated);
+
+        if (user.role === 'agent' || user.role === 'admin') {
+            let teamChannel = echo.private('team');
+            teamChannel
+                .listen('.ticket.cree', handleTicketCreated)
+                .listen('.ticket.supprime', handleTicketDeleted);
+        }
+
+        return () => {
+            echo.leave(`App.Models.User.${user.id}`);
+            if (user.role === 'agent' || user.role === 'admin') {
+                echo.leave('team');
+            }
+        };
+    }, [user?.id, user?.role, tickets]);
+
+    const handleTicketViewed = useCallback((ticketId) => {
+        setUnreadTicketIds(prevSet => {
+            const newSet = new Set(prevSet);
+            newSet.delete(ticketId);
+            return newSet;
+        });
+    }, []);
 
     const filteredTickets = tickets.filter(ticket =>
         (filters.search === '' ||
@@ -126,8 +115,7 @@ const MyTicketsPage = () => {
             `TKT-${ticket.id}`.toLowerCase().includes(filters.search.toLowerCase())
         ) &&
         (filters.status === '' || ticket.statut === filters.status) &&
-        (filters.priority === '' || ticket.categorie === filters.priority) &&
-        (filters.agent === '' || ticket.agent_id === parseInt(filters.agent))
+        (filters.priority === '' || ticket.categorie === filters.priority)
     );
 
     return (
@@ -145,8 +133,6 @@ const MyTicketsPage = () => {
             </div>
             <div className="bg-white rounded-lg shadow mb-6">
                 <TicketFilters
-                    allTickets={tickets}
-                    onFilter={setTickets}
                     filters={filters}
                     setFilters={setFilters}
                 />
@@ -155,14 +141,14 @@ const MyTicketsPage = () => {
                 tickets={filteredTickets}
                 isLoading={isLoading}
                 error={error}
-                onTicketDeleted={handleTicketDeleted}
-                onTicketViewed={handleTicketViewed} // <-- Passage de la fonction de rappel ici
-                newlyUpdatedTicketId={newlyUpdatedTicketId}
+                onTicketDeleted={(ticketId) => setTickets(prev => prev.filter(t => t.id !== ticketId))}
+                onTicketViewed={handleTicketViewed}
+                unreadTicketIds={unreadTicketIds}
             />
             <CreateTicketModal
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
-                onSuccess={handleCreateSuccess}
+                onSuccess={(newTicket) => setTickets(prev => [newTicket, ...prev])}
             />
         </div>
     );

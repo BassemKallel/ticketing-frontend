@@ -9,6 +9,7 @@ import MyTicketsPage from '../pages/MyticketsPages';
 import { useAuth } from '../hooks/useAuth'; 
 import UsersListPage from '../pages/UserListPage';
 import NotificationsPage from '../pages/NotificationsPage';
+import NotFoundPage from '../pages/NotFoundPage';
 
 
 
@@ -61,7 +62,7 @@ const AppRoutes = () => {
             <Route path="/tickets/:id" element={<ProtectedRoute><MainLayout><TicketDetailPage /></MainLayout></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><MainLayout><NotificationsPage /></MainLayout></ProtectedRoute>} />
 
-            <Route path="*" element={<div>404 - Page non trouvée</div>} />
+            <Route path="*" element={NotFoundPage} />
         </Routes>
     );
 };

@@ -19,7 +19,7 @@ const getAvatarColor = (name) => {
     return colors[index];
 };
 
-const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed, newlyUpdatedTicketId }) => {
+const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed, unreadTicketIds = new Set() }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -27,7 +27,9 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleTicketClick = (ticketId) => {
-        onTicketViewed(ticketId);
+        if (onTicketViewed) {
+            onTicketViewed(ticketId);
+        }
         navigate(`/tickets/${ticketId}`);
     };
 
@@ -43,11 +45,11 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
         try {
             await ticketService.delete(ticketToDelete);
             toast.success(`Ticket TKT-${ticketToDelete} supprimé avec succès`);
+            // Appelle la fonction du parent pour mettre à jour la liste
             if (onTicketDeleted) {
                 onTicketDeleted(ticketToDelete);
             }
         } catch (err) {
-            console.error("Erreur lors de la suppression :", err.message);
             toast.error(err.message);
         } finally {
             setIsDeleting(false);
@@ -81,10 +83,9 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
         );
     }
 
-    console.log('Tickets affichés:', tickets); 
-
     return (
         <>
+            {/* Vue pour ordinateur */}
             <div className="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -101,26 +102,25 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
                         <tbody className="text-gray-700 divide-y divide-gray-100">
                             {tickets.map((ticket) => {
                                 const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
-                                const isUpdated = ticket.id === newlyUpdatedTicketId;
+                                const isUpdated = unreadTicketIds.has(ticket.id);
+                                const rowClasses = `hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'font-bold' : ''
+                                    }`;
+
                                 return (
                                     <tr
                                         key={ticket.id}
-                                        className={`hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'font-bold bg-yellow-50 animate-pulse' : ''}`}
+                                        className={rowClasses}
                                         onClick={() => handleTicketClick(ticket.id)}
                                         role="button"
                                         aria-label={`Voir le ticket TKT-${ticket.id}`}
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-4">
-                                                <div
-                                                    className={`h-12 w-12 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-base ${getAvatarColor(
-                                                        ticket.createur?.name
-                                                    )}`}
-                                                >
+                                                <div className={`h-12 w-12 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-base ${getAvatarColor(ticket.createur?.name)}`}>
                                                     {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
                                                 </div>
                                                 <div>
-                                                    <p className={`font-semibold text-sm text-gray-800 ${isUpdated ? 'font-bold' : ''}`}>
+                                                    <p className="font-semibold text-sm text-gray-800">
                                                         {ticket.title}
                                                     </p>
                                                     <p className="text-xs text-gray-500">
@@ -139,11 +139,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
                                             {ticket.agent?.name || 'Non assigné'}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
-                                            {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric',
-                                            })}
+                                            {new Date(ticket.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })} à {new Date(ticket.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <button
@@ -163,29 +159,27 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
                     </table>
                 </div>
             </div>
+            {/* Vue pour mobile */}
             <div className="md:hidden space-y-4">
                 {tickets.map((ticket) => {
                     const canDelete = user?.role === 'admin' || String(user?.id) === String(ticket.createur?.id);
-                    const isUpdated = ticket.id === newlyUpdatedTicketId;
+                    const isUpdated = unreadTicketIds.has(ticket.id);
+                    const cardClasses = `bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'font-bold' : ''}`;
                     return (
                         <div
                             key={ticket.id}
-                            className={`bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${isUpdated ? 'border-l-4 border-orange-500 font-bold animate-pulse' : ''}`}
+                            className={cardClasses}
                             onClick={() => handleTicketClick(ticket.id)}
                             role="button"
                             aria-label={`Voir le ticket TKT-${ticket.id}`}
                         >
                             <div className="flex justify-between items-center mb-3">
                                 <div className="flex items-center gap-3">
-                                    <div
-                                        className={`h-10 w-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm ${getAvatarColor(
-                                            ticket.createur?.name
-                                        )}`}
-                                    >
+                                    <div className={`h-10 w-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm ${getAvatarColor(ticket.createur?.name)}`}>
                                         {ticket.createur?.name?.charAt(0).toUpperCase() || '?'}
                                     </div>
                                     <div>
-                                        <p className={`font-semibold text-sm text-gray-800 ${isUpdated ? 'font-bold' : ''}`}>
+                                        <p className="font-semibold text-sm text-gray-800">
                                             {ticket.title}
                                         </p>
                                         <p className="text-xs text-gray-500">
@@ -203,11 +197,7 @@ const TicketList = ({ tickets, isLoading, error, onTicketDeleted, onTicketViewed
                             </div>
                             <div className="text-sm text-gray-600">
                                 Créé le :{' '}
-                                {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                })}
+                                {new Date(ticket.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                             </div>
                             <div className="mt-4 flex justify-end">
                                 <button

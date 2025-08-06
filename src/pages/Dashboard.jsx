@@ -12,8 +12,7 @@ const Dashboard = () => {
 
     return (
         <div>
-            {/* Vous pouvez ajouter les StatCards ici plus tard */}
-            <TicketList title="Recent Tickets" tickets={recentTicketsData} />
+            <h1>Stats</h1>
         </div>
     );
 };
