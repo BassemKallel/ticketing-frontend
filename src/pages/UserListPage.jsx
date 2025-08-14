@@ -142,7 +142,7 @@ const UsersListPage = () => {
     
 
     return (
-        <div className="container mx-auto p-5 max-w-7xl">
+        <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Gestion des Utilisateurs</h1>
                 <button

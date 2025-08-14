@@ -48,7 +48,7 @@ const Login = () => {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-white border border-[#F4C430] text-gray-900 rounded-lg focus:ring-[#F28C38] focus:border-[#F28C38] block w-full p-2.5 transition-colors duration-200 focus:ring-2"
+                                    className="bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-orange-400 focus:border-orange-400 block w-full p-2.5 transition-colors duration-200 focus:ring-2"
                                     placeholder="name@company.com"
                                     required
                                 />
@@ -67,7 +67,7 @@ const Login = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="bg-white border border-[#F4C430] text-gray-900 rounded-lg focus:ring-[#F28C38] focus:border-[#F28C38] block w-full p-2.5 transition-colors duration-200 focus:ring-2"
+                                    className="bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-orange-400 focus:border-orange-400 block w-full p-2.5 transition-colors duration-200 focus:ring-2"
                                     required
                                 />
                             </div>

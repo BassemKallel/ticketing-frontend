@@ -24,7 +24,7 @@ const ChatMessage = ({ message, currentUser, onDeleteRequest }) => {
                 </div>
             )}
 
-            <div className={`relative w-full rounded-lg p-3 ${isRightAligned ? 'bg-orange-400 text-white' : 'bg-gray-100 text-gray-800'}`}>
+            <div className={`relative w-full rounded-lg p-3 ${isRightAligned ? 'bg-[#F28C38] text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <div className="flex items-baseline gap-2 text-xs mb-1">
                     <p className="font-bold">{message.auteur.name}</p>
                     <p className={`${isRightAligned ? 'text-orange-200' : 'text-gray-500'}`}>{formattedDate}</p>

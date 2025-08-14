@@ -204,8 +204,15 @@ const TicketDetailPage = () => {
             toast.update(deletingToast, { render: response?.message || "Élément supprimé !", type: "success", isLoading: false, autoClose: 3000 });
         } catch (err) {
             console.error("Erreur lors de la suppression :", err);
-            const errorMessage = err.response?.data?.message || "Erreur lors de la suppression.";
-            toast.update(deletingToast, { render: errorMessage, type: "error", isLoading: false, autoClose: 5000 });
+            const errorMessage =
+                (err && err.response && err.response.data && err.response.data.message)
+                    ? err.response.data.message
+                    : (err && err.message)
+                        ? err.message
+                        : "Erreur lors de la suppression.";
+            if (toast && typeof toast.update === "function") {
+                toast.update(deletingToast, { render: errorMessage, type: "error", isLoading: false, autoClose: 5000 });
+            }
         } finally {
             setItemToDelete(null);
         }
@@ -256,7 +263,7 @@ const TicketDetailPage = () => {
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
-                                className="w-full border-gray-200 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500"
+                                className="w-full border-gray-200 rounded-md p-2 focus:ring-orange-400 focus:border-orange-400"
                                 rows="3"
                                 placeholder="Écrivez votre réponse ici..."
                             />
@@ -271,7 +278,7 @@ const TicketDetailPage = () => {
                                     <PaperClipIcon className="h-6 w-6" />
                                 </button>
                                 <input type="file" ref={fileInputRef} onChange={(e) => setNewFile(e.target.files[0])} className="hidden" />
-                                <button type="submit" className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-lg hover:bg-orange-600 flex items-center transition-colors">
+                                <button type="submit" className="bg-[#F28C38] text-white font-semibold px-6 py-2 rounded-lg hover:bg-orange-500 flex items-center transition-colors">
                                     Envoyer
                                     <PaperAirplaneIcon className="h-5 w-5 ml-2 -rotate-45" />
                                 </button>
@@ -287,7 +294,7 @@ const TicketDetailPage = () => {
                         </div>
 
                         <div className="p-6 space-y-6">
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-gray-100 rounded-xl">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 mb-1">Statut</p>
                                     <StatusBadge type="status" value={ticket.statut} />
@@ -305,7 +312,7 @@ const TicketDetailPage = () => {
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
                                     <div className="flex items-center">
-                                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                                        <div className="w-2 h-2 bg-orange-400 rounded-full mr-3"></div>
                                         <span className="text-sm font-medium text-gray-600">ID Ticket</span>
                                     </div>
                                     <span className="text-sm font-semibold text-gray-900">TKT-{ticket.id}</span>
@@ -337,24 +344,22 @@ const TicketDetailPage = () => {
                                 </div>
                             </div>
 
-                            {/* Assigné à avec style orange */}
-                            <div className="bg-gray-50 p-4 rounded-xl border border-orange-100">
+                            <div className="bg-gray-100 p-4 rounded-xl">
                                 <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm font-medium text-orange-500">Assigné à</p>
                                     {user?.role === 'admin' && (
                                         <button
                                             onClick={() => setAssignModalOpen(true)}
-                                            className="text-sm text-orange-500 hover:text-orange-600 font-medium underline-offset-2 hover:underline"
+                                            className="text-sm text-orange-400 hover:text-orange-500 font-medium underline-offset-2 hover:underline"
                                         >
-                                            Réassigner
+                                            Assigner
                                         </button>
                                     )}
                                 </div>
                                 <p className="font-semibold text-gray-900 text-lg">{ticket.agent?.name || 'Non assigné'}</p>
                             </div>
 
-                            {/* Créé par avec avatar orange */}
-                            <div className="bg-gray-50 p-4 rounded-xl border border-orange-100">
+                            <div className="bg-gray-100 p-4 rounded-xl">
                                 <p className="text-sm font-medium text-orange-500 mb-3">Créé par</p>
                                 <div className="flex items-center">
                                     <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold shadow-lg">

@@ -122,8 +122,7 @@ const NotificationsPage = () => {
     }
 
     return (
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-            {/* Header */}
+        <div className="">
                 <div className="flex justify-between items-center mb-10">
                     <h1 className="text-3xl font-bold text-gray-800">Notifications</h1>
                     {unreadCount > 0 && (
@@ -141,7 +140,6 @@ const NotificationsPage = () => {
                     )}
                 </div>
 
-            {/* Liste des notifications */}
             <div className="bg-white rounded-lg shadow">
                 {notifications.length > 0 ? (
                     Object.entries(groupedNotifications).map(([groupName, groupNotifications]) =>

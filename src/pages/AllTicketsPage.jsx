@@ -137,7 +137,7 @@ const AllTicketsPage = () => {
     );
 
     return (
-        <div className='container mx-auto p-4 sm:p-6 lg:p-8'>
+        <div className=''>
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Tous les tickets</h1>
             </div>
